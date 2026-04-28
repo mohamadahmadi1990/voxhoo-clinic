@@ -4,6 +4,8 @@ import { CategoryIcon } from "@/components/category-icon";
 import { CategoryRail } from "@/components/category-rail";
 import { CategorySearch } from "@/components/category-search";
 import { SiteHeader } from "@/components/site-header";
+import { TopClinicsCarousel } from "@/components/top-clinics-carousel";
+import { getTopClinics, hasDatabaseUrl } from "@/db";
 import { clinicCategories } from "@/lib/clinic-categories";
 import { getCategoryTheme } from "@/lib/category-theme";
 import { cn } from "@/lib/utils";
@@ -31,10 +33,12 @@ const valueProps = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const topClinics = hasDatabaseUrl() ? await getTopClinics(8) : [];
+
   return (
     <>
-      <SiteHeader />
+      <SiteHeader showSearch={false} />
       <main className="min-h-screen">
         <section className="mx-auto w-full max-w-7xl px-6 pb-10 pt-12 sm:px-8 lg:px-10">
           <div className="mx-auto max-w-4xl text-center">
@@ -54,6 +58,8 @@ export default function Home() {
         </section>
 
         <CategoryRail categories={clinicCategories} />
+
+        <TopClinicsCarousel clinics={topClinics} />
 
         <section className="mx-auto w-full max-w-7xl px-6 py-10 sm:px-8 lg:px-10">
           <div className="flex items-end justify-between gap-4">

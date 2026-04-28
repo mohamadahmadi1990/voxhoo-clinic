@@ -1,5 +1,5 @@
 import { neon } from "@neondatabase/serverless";
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import type { ClinicCategorySlug } from "../lib/clinic-categories";
 import { clinics } from "./schema";
@@ -52,4 +52,23 @@ export async function getClinicsByCategory(
     .from(clinics)
     .where(eq(clinics.category, category))
     .orderBy(asc(clinics.name));
+}
+
+export async function getTopClinics(limit = 8): Promise<ClinicListItem[]> {
+  const db = getDb();
+
+  return db
+    .select({
+      id: clinics.id,
+      name: clinics.name,
+      category: clinics.category,
+      address: clinics.address,
+      lat: clinics.lat,
+      lng: clinics.lng,
+      rating: clinics.rating,
+      phone: clinics.phone,
+    })
+    .from(clinics)
+    .orderBy(desc(clinics.rating), asc(clinics.name))
+    .limit(limit);
 }

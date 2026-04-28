@@ -12,9 +12,13 @@ import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-type ClinicsByCategoryPageProps = {params: Promise<{ category: string }>;};
+type ClinicsByCategoryPageProps = {
+  params: Promise<{ category: string }>;
+};
 
-export async function generateMetadata({params,}: ClinicsByCategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: ClinicsByCategoryPageProps): Promise<Metadata> {
   const { category } = await params;
   const currentCategory = getCategoryBySlug(category);
 
