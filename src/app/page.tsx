@@ -11,6 +11,8 @@ import { clinicCategories } from "@/lib/clinic-categories";
 import { getCategoryTheme } from "@/lib/category-theme";
 import { cn } from "@/lib/utils";
 
+export const revalidate = 60;
+
 const valueProps = [
   {
     title: "Fast category discovery",

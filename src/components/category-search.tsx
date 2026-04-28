@@ -26,7 +26,7 @@ export function CategorySearch({ categories }: CategorySearchProps) {
     const match = findCategoryByQuery(query);
 
     if (!match) {
-      setError("Try Dental, Family Doctor, or Mental Health.");
+      setError("Try a category like Dental, Family Doctor, or Mental Health.");
       return;
     }
 
@@ -57,7 +57,7 @@ export function CategorySearch({ categories }: CategorySearchProps) {
                     setError("");
                   }
                 }}
-                placeholder="Dental, family doctor, mental health..."
+                placeholder="Search clinic categories..."
                 className="h-auto border-0 bg-transparent px-0 text-sm shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
                 aria-label="Search clinic categories"
               />
@@ -80,7 +80,7 @@ export function CategorySearch({ categories }: CategorySearchProps) {
       </form>
 
       <p className="mt-4 text-center text-sm leading-6 text-muted-foreground">
-        {error || "Or jump straight into a category, just like Airbnb-style browsing."}
+        {error || "Start by choosing a clinic category."}
       </p>
 
       <div className="mt-6 flex flex-wrap justify-center gap-3">
