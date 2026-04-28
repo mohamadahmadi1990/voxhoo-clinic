@@ -3,9 +3,10 @@ import { ArrowRight, MapPinned, SearchCheck, ShieldCheck, Stethoscope } from "lu
 import { CategoryIcon } from "@/components/category-icon";
 import { CategoryRail } from "@/components/category-rail";
 import { CategorySearch } from "@/components/category-search";
+import { DataNotice } from "@/components/data-notice";
 import { SiteHeader } from "@/components/site-header";
 import { TopClinicsCarousel } from "@/components/top-clinics-carousel";
-import { getTopClinics, hasDatabaseUrl } from "@/db";
+import { getTopClinicsSafe } from "@/db";
 import { clinicCategories } from "@/lib/clinic-categories";
 import { getCategoryTheme } from "@/lib/category-theme";
 import { cn } from "@/lib/utils";
@@ -23,7 +24,7 @@ const valueProps = [
   },
   {
     title: "Credible clinic data",
-    description: "Toronto sample clinics now come from Neon, not local mock state.",
+    description: "Live clinic data can fall back to trusted Toronto samples if the database is unavailable.",
     icon: ShieldCheck,
   },
   {
@@ -34,7 +35,12 @@ const valueProps = [
 ];
 
 export default async function Home() {
-  const topClinics = hasDatabaseUrl() ? await getTopClinics(8) : [];
+  const topClinicsResult = await getTopClinicsSafe(8);
+  const topClinics = topClinicsResult.clinics;
+  const topClinicsBadgeLabel =
+    topClinicsResult.source === "database"
+      ? "Toronto clinics from Neon"
+      : "Showing Toronto sample clinics";
 
   return (
     <>
@@ -59,6 +65,12 @@ export default async function Home() {
 
         <CategoryRail categories={clinicCategories} />
 
+        {topClinicsResult.warning ? (
+          <section className="mx-auto w-full max-w-7xl px-6 pt-8 sm:px-8 lg:px-10">
+            <DataNotice message={topClinicsResult.warning} />
+          </section>
+        ) : null}
+
         <TopClinicsCarousel clinics={topClinics} />
 
         <section className="mx-auto w-full max-w-7xl px-6 py-10 sm:px-8 lg:px-10">
@@ -73,7 +85,7 @@ export default async function Home() {
             </div>
 
             <div className="hidden rounded-full bg-secondary px-4 py-2 text-sm font-medium text-muted-foreground md:block">
-              Toronto clinics from Neon
+              {topClinicsBadgeLabel}
             </div>
           </div>
 

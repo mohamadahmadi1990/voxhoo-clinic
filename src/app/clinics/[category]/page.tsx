@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
-import { getClinicsByCategory, hasDatabaseUrl } from "@/db";
 import { CategoryRail } from "@/components/category-rail";
 import { ClinicResultsView } from "@/components/clinic-results-view";
+import { DataNotice } from "@/components/data-notice";
 import { SiteHeader } from "@/components/site-header";
 import { buttonVariants } from "@/components/ui/button";
+import { getClinicsByCategorySafe } from "@/db";
 import { clinicCategories, getCategoryBySlug } from "@/lib/clinic-categories";
 import { cn } from "@/lib/utils";
 
@@ -44,10 +45,8 @@ export default async function ClinicsByCategoryPage({
     notFound();
   }
 
-  const databaseReady = hasDatabaseUrl();
-  const clinics = databaseReady
-    ? await getClinicsByCategory(currentCategory.slug)
-    : [];
+  const clinicsResult = await getClinicsByCategorySafe(currentCategory.slug);
+  const clinics = clinicsResult.clinics;
   const alternateCategories = clinicCategories.filter(
     (entry) => entry.slug !== currentCategory.slug,
   );
@@ -102,13 +101,7 @@ export default async function ClinicsByCategoryPage({
             </div>
           </div>
 
-          {!databaseReady ? (
-            <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-900">
-              Add <code>DATABASE_URL</code> to <code>.env.local</code>, then run
-              <code> npm run db:push</code> and <code> npm run db:seed</code> to
-              load the Neon-backed clinic data for this page.
-            </div>
-          ) : null}
+          {clinicsResult.warning ? <DataNotice message={clinicsResult.warning} /> : null}
 
           <ClinicResultsView
             categoryLabel={currentCategory.label}
