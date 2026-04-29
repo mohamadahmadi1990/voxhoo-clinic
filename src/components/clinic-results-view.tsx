@@ -189,7 +189,7 @@ export function ClinicResultsView({
 
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-                            Care Atlas pick
+                            Voxhoo pick
                           </p>
                           <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
                             {String(index + 1).padStart(2, "0")}

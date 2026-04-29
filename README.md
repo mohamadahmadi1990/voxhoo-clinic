@@ -1,6 +1,6 @@
-# Care Atlas
+# Voxhoo Clinic
 
-Care Atlas is a healthcare clinic discovery MVP built with Next.js.
+Voxhoo Clinic is a healthcare clinic discovery MVP built with Next.js.
 
 The current goal is simple:
 help users discover clinics by category, compare them in a list, and see them on a map.

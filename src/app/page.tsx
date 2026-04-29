@@ -98,7 +98,7 @@ export default async function Home() {
                     <div className="absolute inset-x-5 bottom-5 flex items-end justify-between">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                          Care Atlas
+                          Voxhoo Clinic
                         </p>
                         <h3 className="mt-2 text-[1.35rem] font-semibold tracking-tight text-foreground sm:text-2xl">
                           {category.label}

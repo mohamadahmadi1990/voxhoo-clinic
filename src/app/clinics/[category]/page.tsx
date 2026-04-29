@@ -40,12 +40,12 @@ export async function generateMetadata({
 
   if (!currentCategory) {
     return {
-      title: "Clinics not found | Care Atlas",
+      title: "Clinics not found | Voxhoo Clinic",
     };
   }
 
   return {
-    title: `${currentCategory.label} Clinics | Care Atlas`,
+    title: `${currentCategory.label} Clinics | Voxhoo Clinic`,
     description: `Explore ${currentCategory.label.toLowerCase()} clinics on a list and map.`,
   };
 }

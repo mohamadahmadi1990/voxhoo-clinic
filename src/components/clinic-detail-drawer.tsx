@@ -163,7 +163,7 @@ export function ClinicDetailDrawer({
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                      Care Atlas
+                      Voxhoo Clinic
                     </p>
                     <Badge className="mt-2 rounded-full bg-white px-3 py-1 text-[0.72rem] font-semibold text-foreground shadow-sm">
                       {categoryLabel}

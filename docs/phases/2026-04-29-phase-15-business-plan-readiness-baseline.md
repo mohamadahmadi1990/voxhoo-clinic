@@ -5,7 +5,7 @@ Status: Completed
 
 ## Objective
 
-Create a clean continuation point for the Care Atlas MVP after the Codex Business upgrade so future work can continue from a documented, validated baseline.
+Create a clean continuation point for the Voxhoo Clinic MVP after the Codex Business upgrade so future work can continue from a documented, validated baseline.
 
 ## Delivered
 
@@ -21,7 +21,7 @@ Create a clean continuation point for the Care Atlas MVP after the Codex Busines
 
 ## Technical Notes
 
-- The project remains aligned with the current Care Atlas MVP scope: discovery only, no auth, booking, payments, dashboards, or admin flows.
+- The project remains aligned with the current Voxhoo Clinic MVP scope: discovery only, no auth, booking, payments, dashboards, or admin flows.
 - The current app stack remains intact and already configured in the repo:
   Next.js 16,
   React 19,

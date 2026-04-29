@@ -8,7 +8,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Care Atlas | Discover clinics by category",
+  title: "Voxhoo Clinic | Discover clinics by category",
   description:
     "Discover nearby clinics by category with a simple list and map experience.",
 };

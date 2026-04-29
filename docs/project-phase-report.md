@@ -24,6 +24,8 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - [Phase 13: Mobile-Friendly Responsive Pass](./phases/2026-04-29-phase-13-mobile-friendly-responsive-pass.md)
 - [Phase 14: Lightweight Results and Fallback Test Coverage](./phases/2026-04-29-phase-14-lightweight-results-and-fallback-test-coverage.md)
 - [Phase 15: Business Plan Readiness Baseline](./phases/2026-04-29-phase-15-business-plan-readiness-baseline.md)
+- [Phase 16: Voxhoo Clinic Rename and GitHub Fork Preparation](./phases/2026-04-29-phase-16-voxhoo-clinic-rename-and-github-fork-preparation.md)
+- [Phase 17: Voxhoo Clinic GitHub Repository Launch](./phases/2026-04-29-phase-17-voxhoo-clinic-github-repository-launch.md)
 
 ## Current Status
 
@@ -45,6 +47,8 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - Homepage categories and top clinics now use single-line marquee-style motion.
 - Lightweight automated coverage now validates results refinement behavior and missing-database fallback handling.
 - A clean continuation branch and validation baseline are now recorded for ongoing Codex work.
+- The project branding now uses Voxhoo Clinic across the app and current docs.
+- A new public GitHub home now exists at `mohamadahmadi1990/voxhoo-clinic`.
 
 ## MVP Scope Still Intentionally Excluded
 

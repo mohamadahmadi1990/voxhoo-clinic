@@ -29,7 +29,9 @@ export function SiteHeader({
             <Cross className="h-3 w-3" />
           </div>
           <div>
-            <p className="text-[0.9rem] font-semibold tracking-tight text-primary">Care Atlas</p>
+            <p className="text-[0.9rem] font-semibold tracking-tight text-primary">
+              Voxhoo Clinic
+            </p>
             <p className="text-[0.66rem] text-muted-foreground">Discover clinics</p>
           </div>
         </Link>
