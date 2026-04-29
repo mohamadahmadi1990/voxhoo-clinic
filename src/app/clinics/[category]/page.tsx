@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CalendarDays, LocateFixed, MapPin } from "lucide-react";
 import { notFound } from "next/navigation";
 import { CategoryRail } from "@/components/category-rail";
 import { ClinicResultsView } from "@/components/clinic-results-view";
@@ -12,6 +12,8 @@ import { clinicCategories, getCategoryBySlug } from "@/lib/clinic-categories";
 import {
   buildClinicSearchQuery,
   formatSearchDateLabel,
+  getDistanceInKilometers,
+  normalizeLocationParam,
   normalizeSearchDateParam,
   normalizeUserLocationParams,
 } from "@/lib/clinic-search";
@@ -23,6 +25,7 @@ type ClinicsByCategoryPageProps = {
   params: Promise<{ category: string }>;
   searchParams: Promise<{
     date?: string | string[];
+    location?: string | string[];
     lat?: string | string[];
     lng?: string | string[];
   }>;
@@ -51,7 +54,7 @@ export default async function ClinicsByCategoryPage({
   searchParams,
 }: ClinicsByCategoryPageProps) {
   const { category } = await params;
-  const { date, lat, lng } = await searchParams;
+  const { date, location, lat, lng } = await searchParams;
   const currentCategory = getCategoryBySlug(category);
 
   if (!currentCategory) {
@@ -60,24 +63,51 @@ export default async function ClinicsByCategoryPage({
 
   const clinicsResult = await getClinicsByCategorySafe(currentCategory.slug);
   const selectedDate = normalizeSearchDateParam(date);
+  const selectedLocation = normalizeLocationParam(location);
   const userLocation = normalizeUserLocationParams({ lat, lng });
-  const clinics = selectedDate
+  const clinicsForDate = selectedDate
     ? clinicsResult.clinics.filter((clinic) => clinic.availableDates.includes(selectedDate))
     : clinicsResult.clinics;
+  const exactAreaClinics = selectedLocation
+    ? clinicsForDate.filter((clinic) => clinic.area === selectedLocation.label)
+    : clinicsForDate;
+  const isLocationFallback =
+    Boolean(selectedLocation) && clinicsForDate.length > 0 && exactAreaClinics.length === 0;
+
+  let clinics = exactAreaClinics;
+
+  if (isLocationFallback && selectedLocation) {
+    clinics = sortClinicsByDistance(clinicsForDate, selectedLocation.center);
+  }
+
+  if (userLocation) {
+    clinics = sortClinicsByDistance(clinics, userLocation);
+  }
+
   const selectedDateLabel = selectedDate
     ? formatSearchDateLabel(selectedDate)
     : null;
+  const selectedLocationLabel = selectedLocation?.label ?? null;
   const sharedQuery = buildClinicSearchQuery({
     date: selectedDate,
+    location: selectedLocation?.slug ?? null,
     userLocation,
   });
-  const alternateCategories = clinicCategories.filter(
-    (entry) => entry.slug !== currentCategory.slug,
-  );
+  const locationFallbackNotice =
+    isLocationFallback && selectedLocation
+      ? `No ${currentCategory.label.toLowerCase()} clinics are listed in ${selectedLocation.label} yet, so we're showing nearby Toronto-area clinics instead.`
+      : null;
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader
+        searchState={{
+          category: currentCategory.slug,
+          date: selectedDate,
+          location: selectedLocation?.slug ?? null,
+          userLocation,
+        }}
+      />
       <CategoryRail
         categories={clinicCategories}
         activeCategory={currentCategory.slug}
@@ -98,52 +128,79 @@ export default async function ClinicsByCategoryPage({
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Link>
-              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                <span>Toronto clinics</span>
-                {selectedDateLabel ? (
-                  <>
-                    <span className="hidden sm:inline">|</span>
-                    <span>Availability on {selectedDateLabel}</span>
-                  </>
-                ) : null}
-              </div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Toronto clinic search
+              </p>
               <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
                 {clinics.length} {currentCategory.label} clinics
               </h1>
               <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
-                {selectedDateLabel
-                  ? `Showing ${currentCategory.label.toLowerCase()} clinics with mock availability on ${selectedDateLabel}.`
-                  : "Compare clinics, ratings, addresses, and map positions in one calm browsing flow."}
+                {selectedLocationLabel && selectedDateLabel
+                  ? `Showing ${currentCategory.label.toLowerCase()} clinics for ${selectedLocationLabel} with mock availability on ${selectedDateLabel}.`
+                  : selectedLocationLabel
+                    ? `Showing ${currentCategory.label.toLowerCase()} clinics for ${selectedLocationLabel}.`
+                    : selectedDateLabel
+                      ? `Showing ${currentCategory.label.toLowerCase()} clinics with mock availability on ${selectedDateLabel}.`
+                      : "Compare clinics, ratings, addresses, and map positions in one calm browsing flow."}
               </p>
-            </div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-sm font-medium text-foreground shadow-sm">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <span>Toronto clinics</span>
+                </div>
 
-            <div className="flex flex-wrap gap-3">
-              {alternateCategories.slice(0, 3).map((entry) => (
-                <Link
-                  key={entry.slug}
-                  href={`/clinics/${entry.slug}${sharedQuery}`}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "lg" }),
-                    "rounded-full px-4",
-                  )}
-                >
-                  {entry.label}
-                </Link>
-              ))}
+                {userLocation ? (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/18 bg-accent px-4 py-2 text-sm font-medium text-foreground shadow-sm">
+                    <LocateFixed className="h-4 w-4 text-primary" />
+                    <span>Near your location</span>
+                  </div>
+                ) : selectedLocationLabel ? (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/18 bg-accent px-4 py-2 text-sm font-medium text-foreground shadow-sm">
+                    <LocateFixed className="h-4 w-4 text-primary" />
+                    <span>{selectedLocationLabel}</span>
+                  </div>
+                ) : null}
+
+                {selectedDateLabel ? (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/18 bg-accent px-4 py-2 text-sm font-medium text-foreground shadow-sm">
+                    <CalendarDays className="h-4 w-4 text-primary" />
+                    <span>{selectedDateLabel}</span>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
 
           {clinicsResult.warning ? <DataNotice message={clinicsResult.warning} /> : null}
+          {locationFallbackNotice ? <DataNotice message={locationFallbackNotice} /> : null}
 
           <ClinicResultsView
             categoryLabel={currentCategory.label}
             categorySlug={currentCategory.slug}
             clinics={clinics}
             selectedDateLabel={selectedDateLabel}
+            selectedLocationLabel={selectedLocationLabel}
+            selectedAreaCenter={selectedLocation?.center ?? null}
             userLocation={userLocation}
           />
         </div>
       </main>
     </>
   );
+}
+
+function sortClinicsByDistance<T extends { lat: number; lng: number; name: string }>(
+  clinics: T[],
+  origin: { lat: number; lng: number },
+) {
+  return [...clinics].sort((left, right) => {
+    const leftDistance = getDistanceInKilometers(origin, left);
+    const rightDistance = getDistanceInKilometers(origin, right);
+
+    if (leftDistance !== rightDistance) {
+      return leftDistance - rightDistance;
+    }
+
+    return left.name.localeCompare(right.name);
+  });
 }

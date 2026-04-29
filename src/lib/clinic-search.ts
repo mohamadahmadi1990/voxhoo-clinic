@@ -6,9 +6,68 @@ export type UserLocation = {
   lng: number;
 };
 
+export const clinicAreaSlugs = [
+  "toronto",
+  "north-york",
+  "scarborough",
+  "etobicoke",
+  "mississauga",
+  "vaughan",
+  "markham",
+  "richmond-hill",
+] as const;
+
+export type ClinicAreaSlug = (typeof clinicAreaSlugs)[number];
+
 type SearchParamValue = string | string[] | undefined;
 
 const searchDatePattern = /^\d{4}-\d{2}-\d{2}$/;
+
+export const clinicAreas = [
+  {
+    slug: "toronto",
+    label: "Toronto",
+    center: { lat: 43.6532, lng: -79.3832 },
+  },
+  {
+    slug: "north-york",
+    label: "North York",
+    center: { lat: 43.7615, lng: -79.4111 },
+  },
+  {
+    slug: "scarborough",
+    label: "Scarborough",
+    center: { lat: 43.7764, lng: -79.2318 },
+  },
+  {
+    slug: "etobicoke",
+    label: "Etobicoke",
+    center: { lat: 43.6205, lng: -79.5132 },
+  },
+  {
+    slug: "mississauga",
+    label: "Mississauga",
+    center: { lat: 43.589, lng: -79.6441 },
+  },
+  {
+    slug: "vaughan",
+    label: "Vaughan",
+    center: { lat: 43.8361, lng: -79.4983 },
+  },
+  {
+    slug: "markham",
+    label: "Markham",
+    center: { lat: 43.8561, lng: -79.337 },
+  },
+  {
+    slug: "richmond-hill",
+    label: "Richmond Hill",
+    center: { lat: 43.8828, lng: -79.4403 },
+  },
+] as const;
+
+export type ClinicArea = (typeof clinicAreas)[number];
+export type ClinicAreaLabel = ClinicArea["label"];
 
 export function normalizeSearchDateParam(value: SearchParamValue) {
   if (typeof value !== "string" || !searchDatePattern.test(value)) {
@@ -40,9 +99,11 @@ export function formatSearchDateLabel(value: Date | string) {
 
 export function buildClinicSearchQuery({
   date,
+  location,
   userLocation,
 }: {
   date?: Date | string | null;
+  location?: ClinicAreaSlug | null;
   userLocation?: UserLocation | null;
 }) {
   const params = new URLSearchParams();
@@ -55,6 +116,10 @@ export function buildClinicSearchQuery({
 
   if (normalizedDate) {
     params.set("date", normalizedDate);
+  }
+
+  if (location) {
+    params.set("location", location);
   }
 
   if (userLocation) {
@@ -71,10 +136,23 @@ export function buildClinicSearchHref(
   category: ClinicCategorySlug,
   options?: {
     date?: Date | string | null;
+    location?: ClinicAreaSlug | null;
     userLocation?: UserLocation | null;
   },
 ) {
   return `/clinics/${category}${buildClinicSearchQuery(options ?? {})}`;
+}
+
+export function normalizeLocationParam(value: SearchParamValue) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  return getClinicAreaBySlug(value);
+}
+
+export function getClinicAreaBySlug(slug: string) {
+  return clinicAreas.find((area) => area.slug === slug) ?? null;
 }
 
 export function normalizeUserLocationParams({

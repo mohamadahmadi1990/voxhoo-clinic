@@ -29,6 +29,8 @@ type ClinicResultsViewProps = {
   categorySlug: ClinicCategorySlug;
   clinics: ClinicListItem[];
   selectedDateLabel?: string | null;
+  selectedLocationLabel?: string | null;
+  selectedAreaCenter?: UserLocation | null;
   userLocation?: UserLocation | null;
 };
 
@@ -37,6 +39,8 @@ export function ClinicResultsView({
   categorySlug,
   clinics,
   selectedDateLabel = null,
+  selectedLocationLabel = null,
+  selectedAreaCenter = null,
   userLocation = null,
 }: ClinicResultsViewProps) {
   const [activeClinicId, setActiveClinicId] = useState<number | null>(null);
@@ -91,22 +95,10 @@ export function ClinicResultsView({
   }
 
   const theme = getCategoryTheme(categorySlug);
-  const clinicsWithDistance = clinics
-    .map((clinic) => ({
-      clinic,
-      distanceKm: userLocation ? getDistanceInKilometers(userLocation, clinic) : null,
-    }))
-    .sort((left, right) => {
-      if (left.distanceKm === null || right.distanceKm === null) {
-        return left.clinic.name.localeCompare(right.clinic.name);
-      }
-
-      if (left.distanceKm !== right.distanceKm) {
-        return left.distanceKm - right.distanceKm;
-      }
-
-      return left.clinic.name.localeCompare(right.clinic.name);
-    });
+  const clinicsWithDistance = clinics.map((clinic) => ({
+    clinic,
+    distanceKm: userLocation ? getDistanceInKilometers(userLocation, clinic) : null,
+  }));
   const detailClinic = clinics.find((clinic) => clinic.id === detailClinicId) ?? null;
 
   return (
@@ -214,7 +206,7 @@ export function ClinicResultsView({
                               {clinic.name}
                             </CardTitle>
                             <p className="mt-1 text-sm text-muted-foreground">
-                              Clinic in Toronto
+                              Clinic in {clinic.area}
                             </p>
                           </div>
 
@@ -285,11 +277,15 @@ export function ClinicResultsView({
                 <p className="text-sm text-muted-foreground">
                   {userLocation
                     ? "Your location is marked on the map, and pins stay sorted by distance in the list."
+                    : selectedLocationLabel
+                      ? `Map centered around ${selectedLocationLabel}.`
                     : "Tap a pin to highlight the matching clinic card."}
                 </p>
               </div>
               <div className="rounded-full bg-white/72 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary shadow-sm">
-                {userLocation ? "Near you" : "Interactive map"}
+                {userLocation
+                  ? "Near you"
+                  : selectedLocationLabel ?? "Interactive map"}
               </div>
             </div>
 
@@ -307,6 +303,8 @@ export function ClinicResultsView({
                   openClinicDetails(clinicId, mapSectionRef.current);
                 }}
                 categoryLabel={categoryLabel}
+                preferredCenter={selectedAreaCenter}
+                preferredCenterLabel={selectedLocationLabel}
                 userLocation={userLocation}
               />
             </div>

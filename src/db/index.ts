@@ -3,7 +3,7 @@ import { asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import type { ClinicCategorySlug } from "../lib/clinic-categories";
 import {
-  attachClinicAvailabilityList,
+  attachClinicMetadataList,
   getMockClinicsByCategory,
   getTopMockClinics,
   type MockClinic,
@@ -58,7 +58,7 @@ export async function getClinicsByCategory(
     .where(eq(clinics.category, category))
     .orderBy(asc(clinics.name));
 
-  return attachClinicAvailabilityList(rows);
+  return attachClinicMetadataList(rows);
 }
 
 export async function getTopClinics(limit = 8): Promise<ClinicListItem[]> {
@@ -70,7 +70,7 @@ export async function getTopClinics(limit = 8): Promise<ClinicListItem[]> {
     .orderBy(desc(clinics.rating), asc(clinics.name))
     .limit(limit);
 
-  return attachClinicAvailabilityList(rows);
+  return attachClinicMetadataList(rows);
 }
 
 export async function getClinicsByCategorySafe(

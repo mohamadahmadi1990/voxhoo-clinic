@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { startOfToday } from "date-fns";
+import { isValid, parseISO, startOfToday } from "date-fns";
 import { CalendarDays, Search } from "lucide-react";
 import { CategoryIcon } from "@/components/category-icon";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ import {
 import type { ClinicCategory, ClinicCategorySlug } from "@/lib/clinic-categories";
 import {
   buildClinicSearchHref,
+  clinicAreas,
+  type ClinicAreaSlug,
   formatSearchDateLabel,
   type UserLocation,
 } from "@/lib/clinic-search";
@@ -26,24 +28,53 @@ import { cn } from "@/lib/utils";
 
 type CategorySearchProps = {
   categories: readonly ClinicCategory[];
+  variant?: "default" | "compact";
+  initialCategory?: ClinicCategorySlug | null;
+  initialDate?: string | null;
+  initialLocation?: ClinicAreaSlug | null;
+  initialUserLocation?: UserLocation | null;
+  showHelperText?: boolean;
+  showCategoryMarquee?: boolean;
+  className?: string;
 };
 
 const locationOptions = [
-  { label: "Use my current location", value: "current-location" },
-  { label: "Toronto", value: "toronto" },
-  { label: "North York", value: "north-york" },
-  { label: "Scarborough", value: "scarborough" },
-  { label: "Etobicoke", value: "etobicoke" },
-  { label: "Mississauga", value: "mississauga" },
-  { label: "Markham", value: "markham" },
+  { label: "Current location", value: "current-location" },
+  ...clinicAreas.map((area) => ({
+    label: area.label,
+    value: area.slug,
+  })),
 ] as const;
 
-export function CategorySearch({ categories }: CategorySearchProps) {
+export function CategorySearch({
+  categories,
+  variant = "default",
+  initialCategory = null,
+  initialDate = null,
+  initialLocation = null,
+  initialUserLocation = null,
+  showHelperText = true,
+  showCategoryMarquee = true,
+  className,
+}: CategorySearchProps) {
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState<ClinicCategorySlug | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const isCompact = variant === "compact";
+  const [selectedCategory, setSelectedCategory] = useState<ClinicCategorySlug | null>(
+    initialCategory,
+  );
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
+    if (!initialDate) {
+      return undefined;
+    }
+
+    const parsedDate = parseISO(initialDate);
+
+    return isValid(parsedDate) ? parsedDate : undefined;
+  });
+  const [selectedLocation, setSelectedLocation] = useState<ClinicAreaSlug | null>(
+    initialLocation,
+  );
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(initialUserLocation);
   const [isDateOpen, setIsDateOpen] = useState(false);
   const [validationMessage, setValidationMessage] = useState("");
   const [locationMessage, setLocationMessage] = useState("");
@@ -64,6 +95,7 @@ export function CategorySearch({ categories }: CategorySearchProps) {
       router.push(
         buildClinicSearchHref(selectedCategory, {
           date: selectedDate,
+          location: selectedLocation,
           userLocation,
         }),
       );
@@ -124,20 +156,37 @@ export function CategorySearch({ categories }: CategorySearchProps) {
     ? "Finding nearby clinics..."
     : userLocation
       ? "Using your location"
-      : selectedLocationLabel ?? "Use my current location";
-  const segmentClass =
-    "relative flex min-h-[84px] flex-col justify-center px-5 py-4 text-left transition-colors duration-200 hover:bg-secondary focus-within:bg-secondary md:min-h-[80px] md:rounded-none md:px-6 md:py-4";
-  const segmentLabelClass =
-    "text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground";
-  const segmentValueClass = "mt-1 text-[0.98rem] font-medium text-foreground";
+      : selectedLocationLabel ?? "Current location";
+  const containerClass = isCompact
+    ? "mx-auto w-full max-w-[760px]"
+    : "mx-auto mt-10 w-full max-w-5xl";
+  const formClass = isCompact
+    ? "rounded-full border border-border bg-white px-2.5 py-[3px] shadow-[0_5px_14px_rgba(0,0,0,0.08)]"
+    : "rounded-[32px] border border-border bg-white p-2 shadow-[0_10px_36px_rgba(0,0,0,0.12)] md:rounded-full";
+  const gridClass = isCompact
+    ? "grid gap-1 md:grid-cols-[minmax(0,1.12fr)_minmax(182px,0.8fr)_minmax(174px,0.76fr)_auto] md:gap-0 md:items-stretch"
+    : "grid gap-2 md:grid-cols-[minmax(0,1.05fr)_minmax(240px,0.9fr)_minmax(220px,0.85fr)_auto] md:gap-0 md:items-stretch";
+  const segmentClass = isCompact
+    ? "relative flex min-h-[46px] flex-col justify-center px-2.5 py-1.5 text-left transition-colors duration-200 hover:bg-secondary focus-within:bg-secondary md:min-h-[44px] md:rounded-none md:px-3 md:py-1.5"
+    : "relative flex min-h-[84px] flex-col justify-center px-5 py-4 text-left transition-colors duration-200 hover:bg-secondary focus-within:bg-secondary md:min-h-[80px] md:rounded-none md:px-6 md:py-4";
+  const segmentLabelClass = isCompact
+    ? "text-[0.54rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+    : "text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground";
+  const segmentValueClass = isCompact
+    ? "mt-0.5 text-[0.8rem] font-medium text-foreground"
+    : "mt-1 text-[0.98rem] font-medium text-foreground";
+  const triggerTextClass = isCompact ? "text-[0.8rem]" : "text-base";
+  const submitButtonClass = isCompact
+    ? "mx-auto size-8 rounded-full p-0 md:ml-0.5 md:mr-0 md:self-center"
+    : "mx-auto size-16 rounded-full p-0 md:ml-2 md:mr-0 md:self-center";
 
   return (
-    <div className="mx-auto mt-10 w-full max-w-5xl">
+    <div className={cn(containerClass, className)}>
       <form
         onSubmit={handleSubmit}
-        className="rounded-[32px] border border-border bg-white p-2 shadow-[0_10px_36px_rgba(0,0,0,0.12)] md:rounded-full"
+        className={formClass}
       >
-        <div className="grid gap-2 md:grid-cols-[minmax(0,1.05fr)_minmax(240px,0.9fr)_minmax(220px,0.85fr)_auto] md:gap-0 md:items-stretch">
+        <div className={gridClass}>
           <div
             className={cn(
               segmentClass,
@@ -162,7 +211,8 @@ export function CategorySearch({ categories }: CategorySearchProps) {
                 <SelectTrigger
                   aria-label="Select clinic category"
                   className={cn(
-                    "h-auto min-h-0 rounded-none border-0 bg-transparent px-0 py-0 text-base font-medium shadow-none hover:bg-transparent focus-visible:ring-0 data-[popup-open]:bg-transparent",
+                    "h-auto min-h-0 rounded-none border-0 bg-transparent px-0 py-0 font-medium shadow-none hover:bg-transparent focus-visible:ring-0 data-[popup-open]:bg-transparent",
+                    triggerTextClass,
                     !selectedCategory && "text-muted-foreground",
                   )}
                 >
@@ -193,7 +243,11 @@ export function CategorySearch({ categories }: CategorySearchProps) {
                   aria-label="Select clinic availability date"
                   className="inline-flex min-h-0 w-full items-center justify-between gap-4 rounded-none border-0 bg-transparent px-0 py-0 text-left outline-none transition-colors hover:bg-transparent focus-visible:ring-0"
                 >
-                  <span className={selectedDateLabel ? segmentValueClass : "mt-1 text-[0.98rem] font-medium text-muted-foreground"}>
+                  <span
+                    className={selectedDateLabel
+                      ? segmentValueClass
+                      : cn("mt-1 font-medium text-muted-foreground", triggerTextClass)}
+                  >
                     {selectedDateLabel ?? "Choose a date"}
                   </span>
                   <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -255,12 +309,14 @@ export function CategorySearch({ categories }: CategorySearchProps) {
                   value: option.value,
                 }))}
                 onValueChange={(value) => {
-                  if (value === "current-location") {
+                  const nextValue = value as ClinicAreaSlug | "current-location" | null;
+
+                  if (nextValue === "current-location") {
                     handleUseMyLocation();
                     return;
                   }
 
-                  setSelectedLocation(value);
+                  setSelectedLocation(nextValue);
                   setUserLocation(null);
                   setLocationMessage("");
                   setIsLocating(false);
@@ -269,7 +325,8 @@ export function CategorySearch({ categories }: CategorySearchProps) {
                 <SelectTrigger
                   aria-label="Choose a location"
                   className={cn(
-                    "h-auto min-h-0 rounded-none border-0 bg-transparent px-0 py-0 text-base font-medium shadow-none hover:bg-transparent focus-visible:ring-0 data-[popup-open]:bg-transparent",
+                    "h-auto min-h-0 rounded-none border-0 bg-transparent px-0 py-0 font-medium shadow-none hover:bg-transparent focus-visible:ring-0 data-[popup-open]:bg-transparent",
+                    triggerTextClass,
                     !selectedLocationLabel && !userLocation && !isLocating && "text-muted-foreground",
                   )}
                 >
@@ -290,48 +347,53 @@ export function CategorySearch({ categories }: CategorySearchProps) {
             type="submit"
             size="lg"
             aria-label="Search clinics"
-            className="mx-auto size-16 rounded-full p-0 md:ml-2 md:mr-0 md:self-center"
+            className={submitButtonClass}
           >
-            <Search className="h-5 w-5" />
+            <Search className={isCompact ? "h-3.5 w-3.5" : "h-5 w-5"} />
           </Button>
         </div>
       </form>
 
-      <p className={cn("mt-4 text-center text-sm leading-6", helperTone)}>
-        {helperMessage}
-      </p>
+      {showHelperText ? (
+        <p className={cn("mt-4 text-center text-sm leading-6", helperTone)}>
+          {helperMessage}
+        </p>
+      ) : null}
 
-      <div className="relative mt-6 overflow-hidden">
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-background via-background/88 to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-background via-background/88 to-transparent" />
+      {showCategoryMarquee ? (
+        <div className="relative mt-6 overflow-hidden">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-background via-background/88 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-background via-background/88 to-transparent" />
 
-        <div className="category-marquee">
-          {[0, 1].map((copyIndex) => (
-            <div
-              key={copyIndex}
-              className="flex shrink-0 items-center gap-3 pr-3"
-              aria-hidden={copyIndex === 1}
-            >
-              {categories.map((category) => (
-                <Link
-                  key={`${copyIndex}-${category.slug}`}
-                  href={buildClinicSearchHref(category.slug, {
-                    date: selectedDate,
-                    userLocation,
-                  })}
-                  tabIndex={copyIndex === 1 ? -1 : undefined}
-                  className="group inline-flex shrink-0 items-center gap-3 rounded-full border border-border bg-white px-4 py-3 text-sm font-medium whitespace-nowrap text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors group-hover:bg-accent group-hover:text-primary">
-                    <CategoryIcon category={category.slug} className="h-4 w-4" />
-                  </div>
-                  <span>{category.label}</span>
-                </Link>
-              ))}
-            </div>
-          ))}
+          <div className="category-marquee">
+            {[0, 1].map((copyIndex) => (
+              <div
+                key={copyIndex}
+                className="flex shrink-0 items-center gap-3 pr-3"
+                aria-hidden={copyIndex === 1}
+              >
+                {categories.map((category) => (
+                  <Link
+                    key={`${copyIndex}-${category.slug}`}
+                    href={buildClinicSearchHref(category.slug, {
+                      date: selectedDate,
+                      location: selectedLocation,
+                      userLocation,
+                    })}
+                    tabIndex={copyIndex === 1 ? -1 : undefined}
+                    className="group inline-flex shrink-0 items-center gap-3 rounded-full border border-border bg-white px-4 py-3 text-sm font-medium whitespace-nowrap text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors group-hover:bg-accent group-hover:text-primary">
+                      <CategoryIcon category={category.slug} className="h-4 w-4" />
+                    </div>
+                    <span>{category.label}</span>
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

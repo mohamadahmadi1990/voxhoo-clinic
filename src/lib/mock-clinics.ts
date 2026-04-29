@@ -1,10 +1,12 @@
 import { addDays, format } from "date-fns";
 import type { ClinicCategorySlug } from "./clinic-categories";
+import type { ClinicAreaLabel } from "./clinic-search";
 
 type BaseMockClinicSeed = {
   name: string;
   category: ClinicCategorySlug;
   address: string;
+  area: ClinicAreaLabel;
   lat: number;
   lng: number;
   rating: number;
@@ -24,6 +26,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Queen West Dental House",
     category: "dental",
     address: "720 Queen St W, Toronto, ON M6J 1E8",
+    area: "Toronto",
     lat: 43.6459,
     lng: -79.4103,
     rating: 4.8,
@@ -33,6 +36,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Bay & Bloor Family Dentistry",
     category: "dental",
     address: "110 Bloor St W, Toronto, ON M5S 2W7",
+    area: "Toronto",
     lat: 43.6697,
     lng: -79.3887,
     rating: 4.7,
@@ -42,6 +46,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Danforth Smile Clinic",
     category: "dental",
     address: "2402 Danforth Ave, Toronto, ON M4C 1K8",
+    area: "Scarborough",
     lat: 43.6876,
     lng: -79.2898,
     rating: 4.9,
@@ -51,6 +56,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Liberty Village Physio",
     category: "physiotherapy",
     address: "85 East Liberty St, Toronto, ON M6K 3R4",
+    area: "Toronto",
     lat: 43.6383,
     lng: -79.4194,
     rating: 4.8,
@@ -60,6 +66,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Midtown Recovery Physio",
     category: "physiotherapy",
     address: "1849 Yonge St, Toronto, ON M4S 1Y2",
+    area: "Toronto",
     lat: 43.7047,
     lng: -79.3984,
     rating: 4.6,
@@ -69,6 +76,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "North York Movement Lab",
     category: "physiotherapy",
     address: "5095 Yonge St, Toronto, ON M2N 6Z4",
+    area: "North York",
     lat: 43.7684,
     lng: -79.4127,
     rating: 4.7,
@@ -78,6 +86,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Yorkville Skin Studio",
     category: "skin-hair",
     address: "1240 Bay St, Toronto, ON M5R 2A7",
+    area: "Toronto",
     lat: 43.6708,
     lng: -79.3882,
     rating: 4.9,
@@ -87,6 +96,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "King West Derm Clinic",
     category: "skin-hair",
     address: "525 King St W, Toronto, ON M5V 1M5",
+    area: "Toronto",
     lat: 43.6451,
     lng: -79.3947,
     rating: 4.7,
@@ -96,6 +106,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Scarborough Skin & Scalp",
     category: "skin-hair",
     address: "300 Borough Dr, Toronto, ON M1P 4P5",
+    area: "Scarborough",
     lat: 43.7755,
     lng: -79.2576,
     rating: 4.8,
@@ -105,6 +116,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Harbourfront Family Practice",
     category: "family-doctor",
     address: "8 York St, Toronto, ON M5J 2Y2",
+    area: "Toronto",
     lat: 43.6416,
     lng: -79.3817,
     rating: 4.7,
@@ -114,6 +126,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Annex Primary Care",
     category: "family-doctor",
     address: "340 Bloor St W, Toronto, ON M5S 1W9",
+    area: "Toronto",
     lat: 43.6673,
     lng: -79.4051,
     rating: 4.6,
@@ -123,6 +136,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "East York Family Health",
     category: "family-doctor",
     address: "840 Coxwell Ave, Toronto, ON M4C 5T2",
+    area: "Scarborough",
     lat: 43.6896,
     lng: -79.3288,
     rating: 4.8,
@@ -132,6 +146,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Adelaide Spine Clinic",
     category: "chiropractic",
     address: "250 Adelaide St W, Toronto, ON M5H 1X6",
+    area: "Toronto",
     lat: 43.6488,
     lng: -79.3884,
     rating: 4.7,
@@ -141,6 +156,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Junction Chiropractic Co",
     category: "chiropractic",
     address: "3075 Dundas St W, Toronto, ON M6P 1Z7",
+    area: "Etobicoke",
     lat: 43.6658,
     lng: -79.4704,
     rating: 4.8,
@@ -150,6 +166,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Lakeshore Posture Studio",
     category: "chiropractic",
     address: "110 Marine Parade Dr, Toronto, ON M8V 0A3",
+    area: "Etobicoke",
     lat: 43.6369,
     lng: -79.4753,
     rating: 4.6,
@@ -159,6 +176,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Yonge Vision Centre",
     category: "optometry",
     address: "2300 Yonge St, Toronto, ON M4P 1E4",
+    area: "North York",
     lat: 43.7092,
     lng: -79.3989,
     rating: 4.8,
@@ -168,6 +186,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Distillery Eye Clinic",
     category: "optometry",
     address: "33 Mill St, Toronto, ON M5A 3R3",
+    area: "Toronto",
     lat: 43.6503,
     lng: -79.3594,
     rating: 4.7,
@@ -177,6 +196,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Etobicoke Eyecare House",
     category: "optometry",
     address: "300 The East Mall, Toronto, ON M9B 6B7",
+    area: "Etobicoke",
     lat: 43.6216,
     lng: -79.5488,
     rating: 4.9,
@@ -186,6 +206,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Queen Street Counseling Collective",
     category: "mental-health",
     address: "955 Queen St W, Toronto, ON M6J 1G9",
+    area: "Toronto",
     lat: 43.6435,
     lng: -79.4171,
     rating: 4.8,
@@ -195,6 +216,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "North Toronto Therapy Rooms",
     category: "mental-health",
     address: "245 Eglinton Ave E, Toronto, ON M4P 3B7",
+    area: "North York",
     lat: 43.7082,
     lng: -79.3928,
     rating: 4.7,
@@ -204,6 +226,7 @@ const baseMockClinicSeeds: BaseMockClinicSeed[] = [
     name: "Riverdale Mind Clinic",
     category: "mental-health",
     address: "747 Broadview Ave, Toronto, ON M4K 2P6",
+    area: "Toronto",
     lat: 43.6766,
     lng: -79.3577,
     rating: 4.9,
@@ -244,29 +267,34 @@ export function getTopMockClinics(limit = 8) {
     .slice(0, limit);
 }
 
-export function attachClinicAvailability<T extends {
+export function attachClinicMetadata<T extends {
   category: ClinicCategorySlug;
   name: string;
-}>(clinic: T): T & { availableDates: string[] } {
+}>(clinic: T): T & { availableDates: string[]; area: ClinicAreaLabel } {
   return {
     ...clinic,
     availableDates: getClinicAvailability(clinic.category, clinic.name),
+    area: getClinicArea(clinic.category, clinic.name),
   };
 }
 
-export function attachClinicAvailabilityList<T extends {
+export function attachClinicMetadataList<T extends {
   category: ClinicCategorySlug;
   name: string;
 }>(clinics: T[]) {
-  return clinics.map((clinic) => attachClinicAvailability(clinic));
+  return clinics.map((clinic) => attachClinicMetadata(clinic));
 }
 
 function getClinicAvailability(category: ClinicCategorySlug, name: string) {
-  return availabilityLookup.get(buildClinicAvailabilityKey(category, name)) ?? [];
+  return availabilityLookup.get(buildClinicMetadataKey(category, name)) ?? [];
+}
+
+function getClinicArea(category: ClinicCategorySlug, name: string) {
+  return areaLookup.get(buildClinicMetadataKey(category, name)) ?? "Toronto";
 }
 
 function generateAvailableDates(clinic: BaseMockClinicSeed) {
-  const random = createSeededRandom(buildClinicAvailabilityKey(clinic.category, clinic.name));
+  const random = createSeededRandom(buildClinicMetadataKey(clinic.category, clinic.name));
   const shuffledDates = [...availabilityDatePool];
 
   for (let index = shuffledDates.length - 1; index > 0; index -= 1) {
@@ -284,12 +312,19 @@ function generateAvailableDates(clinic: BaseMockClinicSeed) {
 
 const availabilityLookup = new Map(
   mockClinicSeeds.map((clinic) => [
-    buildClinicAvailabilityKey(clinic.category, clinic.name),
+    buildClinicMetadataKey(clinic.category, clinic.name),
     clinic.availableDates,
   ]),
 );
 
-function buildClinicAvailabilityKey(category: ClinicCategorySlug, name: string) {
+const areaLookup = new Map(
+  mockClinicSeeds.map((clinic) => [
+    buildClinicMetadataKey(clinic.category, clinic.name),
+    clinic.area,
+  ]),
+);
+
+function buildClinicMetadataKey(category: ClinicCategorySlug, name: string) {
   return `${category}::${name}`;
 }
 

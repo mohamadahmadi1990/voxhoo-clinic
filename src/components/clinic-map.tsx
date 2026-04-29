@@ -16,6 +16,8 @@ type ClinicMapProps = {
   activeClinicId: number | null;
   onSelectClinic: (clinicId: number | null) => void;
   categoryLabel: string;
+  preferredCenter?: UserLocation | null;
+  preferredCenterLabel?: string | null;
   userLocation?: UserLocation | null;
 };
 
@@ -91,6 +93,8 @@ function LoadedClinicMap({
   onSelectClinic,
   apiKey,
   categoryLabel,
+  preferredCenter = null,
+  preferredCenterLabel = null,
   userLocation = null,
 }: LoadedClinicMapProps) {
   const { isLoaded, loadError } = useJsApiLoader({
@@ -113,6 +117,12 @@ function LoadedClinicMap({
       return;
     }
 
+    if (preferredCenter && clinics.length === 0) {
+      map.panTo(preferredCenter);
+      map.setZoom(11);
+      return;
+    }
+
     if (clinics.length === 0) {
       map.setCenter(defaultTorontoCenter);
       map.setZoom(11);
@@ -120,6 +130,11 @@ function LoadedClinicMap({
     }
 
     const bounds = new window.google.maps.LatLngBounds();
+
+    if (preferredCenter) {
+      bounds.extend(preferredCenter);
+    }
+
     clinics.forEach((clinic) => {
       bounds.extend({
         lat: clinic.lat,
@@ -128,7 +143,7 @@ function LoadedClinicMap({
     });
 
     map.fitBounds(bounds, 72);
-  }, [clinics, map, selectedClinic, userLocation]);
+  }, [clinics, map, preferredCenter, selectedClinic, userLocation]);
 
   useEffect(() => {
     if (!map || !selectedClinic) {
@@ -176,7 +191,7 @@ function LoadedClinicMap({
     <GoogleMap
       mapContainerStyle={mapContainerStyle}
       onLoad={(instance) => {
-        instance.setCenter(defaultTorontoCenter);
+        instance.setCenter(preferredCenter ?? defaultTorontoCenter);
         instance.setZoom(11);
         setMap(instance);
       }}
@@ -219,6 +234,15 @@ function LoadedClinicMap({
           title="Your location"
           icon={createUserMarkerIcon()}
           zIndex={20}
+        />
+      ) : null}
+
+      {!userLocation && preferredCenter ? (
+        <MarkerF
+          position={preferredCenter}
+          title={preferredCenterLabel ? `${preferredCenterLabel} area` : "Selected area"}
+          icon={createAreaMarkerIcon()}
+          zIndex={5}
         />
       ) : null}
 
@@ -266,6 +290,26 @@ function createMarkerIcon(isActive: boolean) {
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
     scaledSize: new window.google.maps.Size(size, height),
     anchor: new window.google.maps.Point(size / 2, height),
+  };
+}
+
+function createAreaMarkerIcon() {
+  if (typeof window === "undefined" || !window.google?.maps) {
+    return undefined;
+  }
+
+  const size = 22;
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 22 22" fill="none">
+      <circle cx="11" cy="11" r="9" fill="rgba(255,56,92,0.12)" stroke="#ff385c" stroke-width="2" />
+      <circle cx="11" cy="11" r="3.5" fill="#ff385c" />
+    </svg>
+  `;
+
+  return {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+    scaledSize: new window.google.maps.Size(size, size),
+    anchor: new window.google.maps.Point(size / 2, size / 2),
   };
 }
 
