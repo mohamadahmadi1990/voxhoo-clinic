@@ -17,30 +17,29 @@ export function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn("w-[308px] bg-white p-4", className)}
       classNames={{
-        months: "flex flex-col gap-4",
-        month: "space-y-4",
-        month_caption: "relative flex items-center justify-center pt-1",
+        months: "flex w-full flex-col",
+        month: "w-full space-y-4",
+        month_caption: "relative flex h-9 items-center justify-center",
         caption_label: "text-sm font-semibold text-foreground",
-        nav: "flex items-center gap-1",
+        nav: "absolute inset-x-0 top-0 flex items-center justify-between",
         button_previous: cn(
           buttonVariants({ variant: "outline", size: "icon-sm" }),
-          "absolute left-1 h-8 w-8 rounded-full bg-white p-0 opacity-70 hover:opacity-100",
+          "h-8 w-8 rounded-full bg-white p-0 shadow-sm opacity-90 hover:opacity-100",
         ),
         button_next: cn(
           buttonVariants({ variant: "outline", size: "icon-sm" }),
-          "absolute right-1 h-8 w-8 rounded-full bg-white p-0 opacity-70 hover:opacity-100",
+          "h-8 w-8 rounded-full bg-white p-0 shadow-sm opacity-90 hover:opacity-100",
         ),
-        month_grid: "w-full border-collapse space-y-1",
-        weekdays: "flex",
-        weekday:
-          "w-9 text-[0.78rem] font-medium text-muted-foreground",
-        week: "mt-2 flex w-full",
-        day: "h-9 w-9 p-0 text-center text-sm",
+        month_grid: "w-full border-collapse",
+        weekdays: "grid grid-cols-7 gap-y-1",
+        weekday: "flex h-9 items-center justify-center text-[0.78rem] font-medium text-muted-foreground",
+        week: "mt-1 grid grid-cols-7",
+        day: "flex h-10 w-10 items-center justify-center p-0 text-sm",
         day_button: cn(
           buttonVariants({ variant: "ghost", size: "icon-sm" }),
-          "h-9 w-9 rounded-full p-0 font-normal aria-selected:opacity-100",
+          "h-10 w-10 rounded-full p-0 font-normal text-foreground aria-selected:opacity-100",
         ),
         today: "text-primary font-semibold",
         selected:

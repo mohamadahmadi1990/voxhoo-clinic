@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MapPin, Phone, Star } from "lucide-react";
+import { Compass, MapPin, Phone, Star } from "lucide-react";
 import { CategoryIcon } from "@/components/category-icon";
 import { ClinicDetailDrawer } from "@/components/clinic-detail-drawer";
 import { ClinicMap } from "@/components/clinic-map";
@@ -16,6 +16,11 @@ import {
 } from "@/components/ui/card";
 import type { ClinicListItem } from "@/db";
 import type { ClinicCategorySlug } from "@/lib/clinic-categories";
+import {
+  formatDistanceLabel,
+  getDistanceInKilometers,
+  type UserLocation,
+} from "@/lib/clinic-search";
 import { getCategoryTheme } from "@/lib/category-theme";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +29,7 @@ type ClinicResultsViewProps = {
   categorySlug: ClinicCategorySlug;
   clinics: ClinicListItem[];
   selectedDateLabel?: string | null;
+  userLocation?: UserLocation | null;
 };
 
 export function ClinicResultsView({
@@ -31,6 +37,7 @@ export function ClinicResultsView({
   categorySlug,
   clinics,
   selectedDateLabel = null,
+  userLocation = null,
 }: ClinicResultsViewProps) {
   const [activeClinicId, setActiveClinicId] = useState<number | null>(null);
   const [detailClinicId, setDetailClinicId] = useState<number | null>(null);
@@ -84,6 +91,22 @@ export function ClinicResultsView({
   }
 
   const theme = getCategoryTheme(categorySlug);
+  const clinicsWithDistance = clinics
+    .map((clinic) => ({
+      clinic,
+      distanceKm: userLocation ? getDistanceInKilometers(userLocation, clinic) : null,
+    }))
+    .sort((left, right) => {
+      if (left.distanceKm === null || right.distanceKm === null) {
+        return left.clinic.name.localeCompare(right.clinic.name);
+      }
+
+      if (left.distanceKm !== right.distanceKm) {
+        return left.distanceKm - right.distanceKm;
+      }
+
+      return left.clinic.name.localeCompare(right.clinic.name);
+    });
   const detailClinic = clinics.find((clinic) => clinic.id === detailClinicId) ?? null;
 
   return (
@@ -94,12 +117,21 @@ export function ClinicResultsView({
             <div>
               <h2 className="text-lg font-semibold text-foreground">Clinic list</h2>
               <p className="text-sm text-muted-foreground">
-                Select a card to center the map or open more clinic details.
+                {userLocation
+                  ? "Clinics are sorted by distance from your location. Select a card to center the map or open more details."
+                  : "Select a card to center the map or open more clinic details."}
               </p>
             </div>
-            <Badge variant="outline" className="bg-white px-3 py-1 shadow-sm">
-              {clinics.length} results
-            </Badge>
+            <div className="flex flex-wrap justify-end gap-2">
+              {userLocation ? (
+                <Badge variant="outline" className="bg-white px-3 py-1 shadow-sm">
+                  Nearest first
+                </Badge>
+              ) : null}
+              <Badge variant="outline" className="bg-white px-3 py-1 shadow-sm">
+                {clinics.length} results
+              </Badge>
+            </div>
           </div>
 
           {clinics.length === 0 ? (
@@ -112,8 +144,9 @@ export function ClinicResultsView({
             </Card>
           ) : null}
 
-          {clinics.map((clinic, index) => {
+          {clinicsWithDistance.map(({ clinic, distanceKm }, index) => {
             const isActive = clinic.id === activeClinicId;
+            const distanceLabel = distanceKm === null ? null : formatDistanceLabel(distanceKm);
 
             return (
               <div
@@ -202,6 +235,12 @@ export function ClinicResultsView({
                           <div className="rounded-full bg-secondary px-4 py-2 text-sm text-foreground">
                             {isActive ? "Focused on the map" : "Select to focus on map"}
                           </div>
+                          {distanceLabel ? (
+                            <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm text-foreground">
+                              <Compass className="h-4 w-4 text-primary" />
+                              {distanceLabel}
+                            </div>
+                          ) : null}
                           <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm text-foreground">
                             <Phone className="h-4 w-4 text-primary" />
                             {clinic.phone}
@@ -244,11 +283,13 @@ export function ClinicResultsView({
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Map view</h2>
                 <p className="text-sm text-muted-foreground">
-                  Tap a pin to highlight the matching clinic card.
+                  {userLocation
+                    ? "Your location is marked on the map, and pins stay sorted by distance in the list."
+                    : "Tap a pin to highlight the matching clinic card."}
                 </p>
               </div>
               <div className="rounded-full bg-white/72 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary shadow-sm">
-                Interactive map
+                {userLocation ? "Near you" : "Interactive map"}
               </div>
             </div>
 
@@ -266,6 +307,7 @@ export function ClinicResultsView({
                   openClinicDetails(clinicId, mapSectionRef.current);
                 }}
                 categoryLabel={categoryLabel}
+                userLocation={userLocation}
               />
             </div>
           </div>

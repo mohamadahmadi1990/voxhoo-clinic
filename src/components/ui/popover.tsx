@@ -19,7 +19,7 @@ const PopoverContent = React.forwardRef<
         <PopoverPrimitive.Popup
           ref={ref}
           className={cn(
-            "surface-panel rounded-[24px] border border-border p-2 text-foreground shadow-[0_18px_48px_rgba(0,0,0,0.16)] outline-none",
+            "rounded-[24px] border border-border bg-white p-2 text-foreground shadow-[0_18px_48px_rgba(0,0,0,0.16)] outline-none",
             className,
           )}
           {...props}

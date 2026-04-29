@@ -9,12 +9,14 @@ import {
 } from "@react-google-maps/api";
 import { Loader2, MapPinned, TriangleAlert } from "lucide-react";
 import type { ClinicListItem } from "@/db";
+import type { UserLocation } from "@/lib/clinic-search";
 
 type ClinicMapProps = {
   clinics: ClinicListItem[];
   activeClinicId: number | null;
   onSelectClinic: (clinicId: number | null) => void;
   categoryLabel: string;
+  userLocation?: UserLocation | null;
 };
 
 type LoadedClinicMapProps = ClinicMapProps & {
@@ -89,6 +91,7 @@ function LoadedClinicMap({
   onSelectClinic,
   apiKey,
   categoryLabel,
+  userLocation = null,
 }: LoadedClinicMapProps) {
   const { isLoaded, loadError } = useJsApiLoader({
     id: "care-atlas-google-map",
@@ -100,12 +103,23 @@ function LoadedClinicMap({
     clinics.find((clinic) => clinic.id === activeClinicId) ?? null;
 
   useEffect(() => {
-    if (!map || clinics.length === 0) {
+    if (!map || selectedClinic) {
+      return;
+    }
+
+    if (userLocation) {
+      map.panTo(userLocation);
+      map.setZoom(Math.max(map.getZoom() ?? 11, 11));
+      return;
+    }
+
+    if (clinics.length === 0) {
+      map.setCenter(defaultTorontoCenter);
+      map.setZoom(11);
       return;
     }
 
     const bounds = new window.google.maps.LatLngBounds();
-
     clinics.forEach((clinic) => {
       bounds.extend({
         lat: clinic.lat,
@@ -114,7 +128,7 @@ function LoadedClinicMap({
     });
 
     map.fitBounds(bounds, 72);
-  }, [clinics, map]);
+  }, [clinics, map, selectedClinic, userLocation]);
 
   useEffect(() => {
     if (!map || !selectedClinic) {
@@ -199,6 +213,15 @@ function LoadedClinicMap({
         );
       })}
 
+      {userLocation ? (
+        <MarkerF
+          position={userLocation}
+          title="Your location"
+          icon={createUserMarkerIcon()}
+          zIndex={20}
+        />
+      ) : null}
+
       {selectedClinic ? (
         <InfoWindowF
           position={{ lat: selectedClinic.lat, lng: selectedClinic.lng }}
@@ -243,5 +266,26 @@ function createMarkerIcon(isActive: boolean) {
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
     scaledSize: new window.google.maps.Size(size, height),
     anchor: new window.google.maps.Point(size / 2, height),
+  };
+}
+
+function createUserMarkerIcon() {
+  if (typeof window === "undefined" || !window.google?.maps) {
+    return undefined;
+  }
+
+  const glowSize = 34;
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${glowSize}" height="${glowSize}" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="17" r="16" fill="rgba(37,99,235,0.16)" />
+      <circle cx="17" cy="17" r="8" fill="#2563eb" stroke="white" stroke-width="3" />
+    </svg>
+  `;
+
+  return {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+    scaledSize: new window.google.maps.Size(glowSize, glowSize),
+    anchor: new window.google.maps.Point(glowSize / 2, glowSize / 2),
+    labelOrigin: new window.google.maps.Point(glowSize / 2, glowSize / 2),
   };
 }

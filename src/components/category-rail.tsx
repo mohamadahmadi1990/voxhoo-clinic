@@ -6,11 +6,13 @@ import { cn } from "@/lib/utils";
 type CategoryRailProps = {
   categories: readonly ClinicCategory[];
   activeCategory?: ClinicCategorySlug;
+  queryString?: string;
 };
 
 export function CategoryRail({
   categories,
   activeCategory,
+  queryString = "",
 }: CategoryRailProps) {
   return (
     <div className="air-divider">
@@ -21,7 +23,7 @@ export function CategoryRail({
           return (
             <Link
               key={category.slug}
-              href={`/clinics/${category.slug}`}
+              href={`/clinics/${category.slug}${queryString}`}
               className={cn(
                 "group flex min-w-fit flex-col items-center gap-2 border-b-2 pb-3 text-sm transition-colors",
                 isActive

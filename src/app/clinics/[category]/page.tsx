@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { format, isValid, parseISO } from "date-fns";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -10,13 +9,23 @@ import { SiteHeader } from "@/components/site-header";
 import { buttonVariants } from "@/components/ui/button";
 import { getClinicsByCategorySafe } from "@/db";
 import { clinicCategories, getCategoryBySlug } from "@/lib/clinic-categories";
+import {
+  buildClinicSearchQuery,
+  formatSearchDateLabel,
+  normalizeSearchDateParam,
+  normalizeUserLocationParams,
+} from "@/lib/clinic-search";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 type ClinicsByCategoryPageProps = {
   params: Promise<{ category: string }>;
-  searchParams: Promise<{ date?: string | string[] }>;
+  searchParams: Promise<{
+    date?: string | string[];
+    lat?: string | string[];
+    lng?: string | string[];
+  }>;
 };
 
 export async function generateMetadata({
@@ -42,7 +51,7 @@ export default async function ClinicsByCategoryPage({
   searchParams,
 }: ClinicsByCategoryPageProps) {
   const { category } = await params;
-  const { date } = await searchParams;
+  const { date, lat, lng } = await searchParams;
   const currentCategory = getCategoryBySlug(category);
 
   if (!currentCategory) {
@@ -50,13 +59,18 @@ export default async function ClinicsByCategoryPage({
   }
 
   const clinicsResult = await getClinicsByCategorySafe(currentCategory.slug);
-  const selectedDate = normalizeSelectedDate(date);
+  const selectedDate = normalizeSearchDateParam(date);
+  const userLocation = normalizeUserLocationParams({ lat, lng });
   const clinics = selectedDate
     ? clinicsResult.clinics.filter((clinic) => clinic.availableDates.includes(selectedDate))
     : clinicsResult.clinics;
   const selectedDateLabel = selectedDate
-    ? format(parseISO(selectedDate), "MMMM d, yyyy")
+    ? formatSearchDateLabel(selectedDate)
     : null;
+  const sharedQuery = buildClinicSearchQuery({
+    date: selectedDate,
+    userLocation,
+  });
   const alternateCategories = clinicCategories.filter(
     (entry) => entry.slug !== currentCategory.slug,
   );
@@ -67,6 +81,7 @@ export default async function ClinicsByCategoryPage({
       <CategoryRail
         categories={clinicCategories}
         activeCategory={currentCategory.slug}
+        queryString={sharedQuery}
       />
 
       <main className="mx-auto w-full max-w-7xl px-6 py-8 sm:px-8 lg:px-10">
@@ -87,7 +102,7 @@ export default async function ClinicsByCategoryPage({
                 <span>Toronto clinics</span>
                 {selectedDateLabel ? (
                   <>
-                    <span className="hidden sm:inline">•</span>
+                    <span className="hidden sm:inline">|</span>
                     <span>Availability on {selectedDateLabel}</span>
                   </>
                 ) : null}
@@ -106,7 +121,7 @@ export default async function ClinicsByCategoryPage({
               {alternateCategories.slice(0, 3).map((entry) => (
                 <Link
                   key={entry.slug}
-                  href={`/clinics/${entry.slug}`}
+                  href={`/clinics/${entry.slug}${sharedQuery}`}
                   className={cn(
                     buttonVariants({ variant: "outline", size: "lg" }),
                     "rounded-full px-4",
@@ -125,23 +140,10 @@ export default async function ClinicsByCategoryPage({
             categorySlug={currentCategory.slug}
             clinics={clinics}
             selectedDateLabel={selectedDateLabel}
+            userLocation={userLocation}
           />
         </div>
       </main>
     </>
   );
-}
-
-function normalizeSelectedDate(value: string | string[] | undefined) {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const parsedDate = parseISO(value);
-
-  if (!isValid(parsedDate)) {
-    return null;
-  }
-
-  return format(parsedDate, "yyyy-MM-dd") === value ? value : null;
 }

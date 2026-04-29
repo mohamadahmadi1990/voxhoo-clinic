@@ -18,11 +18,13 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - [Phase 7: Homepage Freshness and Search Clarity](./phases/2026-04-28-phase-7-homepage-freshness-search-clarity.md)
 - [Phase 8: Documentation and Project Reporting](./phases/2026-04-28-phase-8-documentation-project-reporting.md)
 - [Phase 9: Category and Date Availability Search](./phases/2026-04-28-phase-9-category-date-availability-search.md)
+- [Phase 10: Search UX Polish and Near-Me Discovery](./phases/2026-04-28-phase-10-search-ux-polish-and-near-me-discovery.md)
 
 ## Current Status
 
 - Category-based clinic discovery is working.
 - Homepage category + date availability search is working.
+- Homepage search now supports optional near-me behavior and a location dropdown.
 - Responsive list + map browsing is working.
 - Google Maps integration is working.
 - Clinic storage is connected to Neon through Drizzle.
@@ -30,6 +32,7 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - Homepage featured clinic data refreshes automatically every 60 seconds.
 - Clinic detail drawer is working with keyboard and focus handling.
 - Results pages can filter clinics by mock available dates from the URL query.
+- Results pages can sort clinics by distance and show a user marker when location is shared.
 
 ## MVP Scope Still Intentionally Excluded
 
@@ -43,6 +46,7 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 ## Recommended Next Steps
 
 - Keep the new date filter but decide whether availability should stay mock-based or move into the database schema next.
+- Decide whether location dropdown city names should stay decorative or start affecting search results.
 - Add basic list sorting such as highest rated or alphabetical.
 - Make the results header search controls consistent with the new homepage search experience.
 - Add lightweight automated tests around category/date filtering and fallback behavior.

@@ -1,6 +1,7 @@
+import { addDays, format } from "date-fns";
 import type { ClinicCategorySlug } from "./clinic-categories";
 
-export type MockClinicSeed = {
+type BaseMockClinicSeed = {
   name: string;
   category: ClinicCategorySlug;
   address: string;
@@ -8,6 +9,9 @@ export type MockClinicSeed = {
   lng: number;
   rating: number;
   phone: string;
+};
+
+export type MockClinicSeed = BaseMockClinicSeed & {
   availableDates: string[];
 };
 
@@ -15,7 +19,7 @@ export type MockClinic = MockClinicSeed & {
   id: number;
 };
 
-export const mockClinicSeeds: MockClinicSeed[] = [
+const baseMockClinicSeeds: BaseMockClinicSeed[] = [
   {
     name: "Queen West Dental House",
     category: "dental",
@@ -24,7 +28,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.4103,
     rating: 4.8,
     phone: "(416) 555-0141",
-    availableDates: ["2026-05-10", "2026-05-12", "2026-05-15"],
   },
   {
     name: "Bay & Bloor Family Dentistry",
@@ -34,7 +37,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.3887,
     rating: 4.7,
     phone: "(416) 555-0184",
-    availableDates: ["2026-05-11", "2026-05-13"],
   },
   {
     name: "Danforth Smile Clinic",
@@ -44,7 +46,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.2898,
     rating: 4.9,
     phone: "(416) 555-0117",
-    availableDates: ["2026-05-10", "2026-05-14"],
   },
   {
     name: "Liberty Village Physio",
@@ -54,7 +55,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.4194,
     rating: 4.8,
     phone: "(416) 555-0103",
-    availableDates: ["2026-05-10", "2026-05-11", "2026-05-13"],
   },
   {
     name: "Midtown Recovery Physio",
@@ -64,7 +64,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.3984,
     rating: 4.6,
     phone: "(416) 555-0136",
-    availableDates: ["2026-05-12", "2026-05-14"],
   },
   {
     name: "North York Movement Lab",
@@ -74,7 +73,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.4127,
     rating: 4.7,
     phone: "(416) 555-0195",
-    availableDates: ["2026-05-11", "2026-05-15"],
   },
   {
     name: "Yorkville Skin Studio",
@@ -84,7 +82,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.3882,
     rating: 4.9,
     phone: "(416) 555-0178",
-    availableDates: ["2026-05-10", "2026-05-12"],
   },
   {
     name: "King West Derm Clinic",
@@ -94,7 +91,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.3947,
     rating: 4.7,
     phone: "(416) 555-0152",
-    availableDates: ["2026-05-13", "2026-05-15"],
   },
   {
     name: "Scarborough Skin & Scalp",
@@ -104,7 +100,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.2576,
     rating: 4.8,
     phone: "(416) 555-0161",
-    availableDates: ["2026-05-11", "2026-05-14"],
   },
   {
     name: "Harbourfront Family Practice",
@@ -114,7 +109,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.3817,
     rating: 4.7,
     phone: "(416) 555-0187",
-    availableDates: ["2026-05-10", "2026-05-13", "2026-05-15"],
   },
   {
     name: "Annex Primary Care",
@@ -124,7 +118,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.4051,
     rating: 4.6,
     phone: "(416) 555-0129",
-    availableDates: ["2026-05-12", "2026-05-14"],
   },
   {
     name: "East York Family Health",
@@ -134,7 +127,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.3288,
     rating: 4.8,
     phone: "(416) 555-0149",
-    availableDates: ["2026-05-11", "2026-05-12"],
   },
   {
     name: "Adelaide Spine Clinic",
@@ -144,7 +136,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.3884,
     rating: 4.7,
     phone: "(416) 555-0110",
-    availableDates: ["2026-05-10", "2026-05-14"],
   },
   {
     name: "Junction Chiropractic Co",
@@ -154,7 +145,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.4704,
     rating: 4.8,
     phone: "(416) 555-0133",
-    availableDates: ["2026-05-11", "2026-05-13", "2026-05-15"],
   },
   {
     name: "Lakeshore Posture Studio",
@@ -164,7 +154,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.4753,
     rating: 4.6,
     phone: "(416) 555-0179",
-    availableDates: ["2026-05-12", "2026-05-15"],
   },
   {
     name: "Yonge Vision Centre",
@@ -174,7 +163,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.3989,
     rating: 4.8,
     phone: "(416) 555-0190",
-    availableDates: ["2026-05-10", "2026-05-11"],
   },
   {
     name: "Distillery Eye Clinic",
@@ -184,7 +172,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.3594,
     rating: 4.7,
     phone: "(416) 555-0107",
-    availableDates: ["2026-05-13", "2026-05-14"],
   },
   {
     name: "Etobicoke Eyecare House",
@@ -194,7 +181,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.5488,
     rating: 4.9,
     phone: "(416) 555-0157",
-    availableDates: ["2026-05-12", "2026-05-15"],
   },
   {
     name: "Queen Street Counseling Collective",
@@ -204,7 +190,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.4171,
     rating: 4.8,
     phone: "(416) 555-0138",
-    availableDates: ["2026-05-10", "2026-05-12", "2026-05-14"],
   },
   {
     name: "North Toronto Therapy Rooms",
@@ -214,7 +199,6 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.3928,
     rating: 4.7,
     phone: "(416) 555-0166",
-    availableDates: ["2026-05-11", "2026-05-13"],
   },
   {
     name: "Riverdale Mind Clinic",
@@ -224,9 +208,18 @@ export const mockClinicSeeds: MockClinicSeed[] = [
     lng: -79.3577,
     rating: 4.9,
     phone: "(416) 555-0120",
-    availableDates: ["2026-05-12", "2026-05-15"],
   },
 ];
+
+const availabilityStartDate = new Date("2026-05-10T00:00:00");
+const availabilityDatePool = Array.from({ length: 7 }, (_, index) =>
+  format(addDays(availabilityStartDate, index), "yyyy-MM-dd"),
+);
+
+export const mockClinicSeeds: MockClinicSeed[] = baseMockClinicSeeds.map((clinic) => ({
+  ...clinic,
+  availableDates: generateAvailableDates(clinic),
+}));
 
 export const mockClinics: MockClinic[] = mockClinicSeeds.map((clinic, index) => ({
   id: index + 1,
@@ -272,6 +265,23 @@ function getClinicAvailability(category: ClinicCategorySlug, name: string) {
   return availabilityLookup.get(buildClinicAvailabilityKey(category, name)) ?? [];
 }
 
+function generateAvailableDates(clinic: BaseMockClinicSeed) {
+  const random = createSeededRandom(buildClinicAvailabilityKey(clinic.category, clinic.name));
+  const shuffledDates = [...availabilityDatePool];
+
+  for (let index = shuffledDates.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    const currentDate = shuffledDates[index];
+
+    shuffledDates[index] = shuffledDates[swapIndex];
+    shuffledDates[swapIndex] = currentDate;
+  }
+
+  const dateCount = 2 + Math.floor(random() * 3);
+
+  return shuffledDates.slice(0, dateCount).sort((left, right) => left.localeCompare(right));
+}
+
 const availabilityLookup = new Map(
   mockClinicSeeds.map((clinic) => [
     buildClinicAvailabilityKey(clinic.category, clinic.name),
@@ -281,4 +291,29 @@ const availabilityLookup = new Map(
 
 function buildClinicAvailabilityKey(category: ClinicCategorySlug, name: string) {
   return `${category}::${name}`;
+}
+
+function createSeededRandom(seed: string) {
+  let state = hashSeed(seed) || 1;
+
+  return () => {
+    state += 0x6d2b79f5;
+
+    let value = state;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function hashSeed(seed: string) {
+  let hash = 2166136261;
+
+  for (const character of seed) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return hash >>> 0;
 }

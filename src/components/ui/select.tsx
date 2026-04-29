@@ -39,7 +39,7 @@ const SelectContent = React.forwardRef<
         <SelectPrimitive.Popup
           ref={ref}
           className={cn(
-            "surface-panel min-w-[240px] rounded-[24px] border border-border p-1.5 text-foreground shadow-[0_18px_48px_rgba(0,0,0,0.16)] outline-none",
+            "min-w-[240px] rounded-[24px] border border-border bg-white p-1.5 text-foreground shadow-[0_18px_48px_rgba(0,0,0,0.16)] outline-none",
             className,
           )}
           {...props}
