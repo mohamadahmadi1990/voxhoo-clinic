@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { format, isValid, parseISO } from "date-fns";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -15,6 +16,7 @@ export const dynamic = "force-dynamic";
 
 type ClinicsByCategoryPageProps = {
   params: Promise<{ category: string }>;
+  searchParams: Promise<{ date?: string | string[] }>;
 };
 
 export async function generateMetadata({
@@ -37,8 +39,10 @@ export async function generateMetadata({
 
 export default async function ClinicsByCategoryPage({
   params,
+  searchParams,
 }: ClinicsByCategoryPageProps) {
   const { category } = await params;
+  const { date } = await searchParams;
   const currentCategory = getCategoryBySlug(category);
 
   if (!currentCategory) {
@@ -46,7 +50,13 @@ export default async function ClinicsByCategoryPage({
   }
 
   const clinicsResult = await getClinicsByCategorySafe(currentCategory.slug);
-  const clinics = clinicsResult.clinics;
+  const selectedDate = normalizeSelectedDate(date);
+  const clinics = selectedDate
+    ? clinicsResult.clinics.filter((clinic) => clinic.availableDates.includes(selectedDate))
+    : clinicsResult.clinics;
+  const selectedDateLabel = selectedDate
+    ? format(parseISO(selectedDate), "MMMM d, yyyy")
+    : null;
   const alternateCategories = clinicCategories.filter(
     (entry) => entry.slug !== currentCategory.slug,
   );
@@ -73,15 +83,22 @@ export default async function ClinicsByCategoryPage({
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Link>
-              <p className="text-sm text-muted-foreground">
-                Toronto clinics
-              </p>
+              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <span>Toronto clinics</span>
+                {selectedDateLabel ? (
+                  <>
+                    <span className="hidden sm:inline">•</span>
+                    <span>Availability on {selectedDateLabel}</span>
+                  </>
+                ) : null}
+              </div>
               <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
                 {clinics.length} {currentCategory.label} clinics
               </h1>
               <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
-                Compare clinics, ratings, addresses, and map positions in one calm
-                browsing flow.
+                {selectedDateLabel
+                  ? `Showing ${currentCategory.label.toLowerCase()} clinics with mock availability on ${selectedDateLabel}.`
+                  : "Compare clinics, ratings, addresses, and map positions in one calm browsing flow."}
               </p>
             </div>
 
@@ -107,9 +124,24 @@ export default async function ClinicsByCategoryPage({
             categoryLabel={currentCategory.label}
             categorySlug={currentCategory.slug}
             clinics={clinics}
+            selectedDateLabel={selectedDateLabel}
           />
         </div>
       </main>
     </>
   );
+}
+
+function normalizeSelectedDate(value: string | string[] | undefined) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const parsedDate = parseISO(value);
+
+  if (!isValid(parsedDate)) {
+    return null;
+  }
+
+  return format(parsedDate, "yyyy-MM-dd") === value ? value : null;
 }

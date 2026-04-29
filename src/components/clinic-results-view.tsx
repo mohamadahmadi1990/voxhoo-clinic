@@ -23,12 +23,14 @@ type ClinicResultsViewProps = {
   categoryLabel: string;
   categorySlug: ClinicCategorySlug;
   clinics: ClinicListItem[];
+  selectedDateLabel?: string | null;
 };
 
 export function ClinicResultsView({
   categoryLabel,
   categorySlug,
   clinics,
+  selectedDateLabel = null,
 }: ClinicResultsViewProps) {
   const [activeClinicId, setActiveClinicId] = useState<number | null>(null);
   const [detailClinicId, setDetailClinicId] = useState<number | null>(null);
@@ -103,8 +105,9 @@ export function ClinicResultsView({
           {clinics.length === 0 ? (
             <Card className="surface-panel rounded-[28px] border border-border py-0">
               <CardContent className="px-6 py-8 text-sm leading-7 text-muted-foreground">
-                No clinics are available in this category right now. Try another care
-                type or check back after more clinics are added.
+                {selectedDateLabel
+                  ? `No ${categoryLabel.toLowerCase()} clinics show mock availability on ${selectedDateLabel}. Try another date or browse the category without a date filter.`
+                  : "No clinics are available in this category right now. Try another care type or check back after more clinics are added."}
               </CardContent>
             </Card>
           ) : null}

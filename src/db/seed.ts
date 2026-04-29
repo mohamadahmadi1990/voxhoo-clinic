@@ -6,7 +6,15 @@ import { mockClinicSeeds } from "../lib/mock-clinics";
 config({ path: ".env.local", quiet: true });
 config({ quiet: true });
 
-const torontoClinics: NewClinic[] = mockClinicSeeds;
+const torontoClinics: NewClinic[] = mockClinicSeeds.map((clinic) => ({
+  name: clinic.name,
+  category: clinic.category,
+  address: clinic.address,
+  lat: clinic.lat,
+  lng: clinic.lng,
+  rating: clinic.rating,
+  phone: clinic.phone,
+}));
 
 async function main() {
   const { getDb } = await import("./index");

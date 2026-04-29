@@ -1,7 +1,7 @@
 # Project Phase Report Index
 
 Last updated: 2026-04-28
-Current branch: `codex/database-fallback`
+Current branch: `codex/category-date-search`
 
 This index links to a separate dated report file for each completed phase of the clinic discovery MVP.
 
@@ -17,16 +17,19 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - [Phase 6: Safe Database Fallback](./phases/2026-04-28-phase-6-safe-database-fallback.md)
 - [Phase 7: Homepage Freshness and Search Clarity](./phases/2026-04-28-phase-7-homepage-freshness-search-clarity.md)
 - [Phase 8: Documentation and Project Reporting](./phases/2026-04-28-phase-8-documentation-project-reporting.md)
+- [Phase 9: Category and Date Availability Search](./phases/2026-04-28-phase-9-category-date-availability-search.md)
 
 ## Current Status
 
 - Category-based clinic discovery is working.
+- Homepage category + date availability search is working.
 - Responsive list + map browsing is working.
 - Google Maps integration is working.
 - Clinic storage is connected to Neon through Drizzle.
 - The app now falls back to sample Toronto clinic data if live DB access fails.
 - Homepage featured clinic data refreshes automatically every 60 seconds.
-- Homepage search wording now clearly communicates category-first behavior.
+- Clinic detail drawer is working with keyboard and focus handling.
+- Results pages can filter clinics by mock available dates from the URL query.
 
 ## MVP Scope Still Intentionally Excluded
 
@@ -39,7 +42,7 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 
 ## Recommended Next Steps
 
-- Add a lightweight clinic detail drawer or page.
-- Extend search to support clinic-name matching in addition to category matching.
+- Keep the new date filter but decide whether availability should stay mock-based or move into the database schema next.
 - Add basic list sorting such as highest rated or alphabetical.
-- Decide whether the homepage should stay static or add revalidation for top-clinic content.
+- Make the results header search controls consistent with the new homepage search experience.
+- Add lightweight automated tests around category/date filtering and fallback behavior.
