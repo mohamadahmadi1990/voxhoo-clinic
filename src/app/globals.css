@@ -156,4 +156,40 @@
     background-clip: text;
     color: transparent;
   }
+
+  .category-marquee {
+    display: flex;
+    width: max-content;
+    align-items: center;
+    animation: category-marquee 32s linear infinite;
+    will-change: transform;
+  }
+
+  .top-clinics-marquee {
+    display: flex;
+    width: max-content;
+    align-items: stretch;
+    animation: category-marquee 96s linear infinite reverse;
+    will-change: transform;
+  }
+}
+
+@keyframes category-marquee {
+  from {
+    transform: translateX(-50%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-marquee {
+    animation: none;
+  }
+
+  .top-clinics-marquee {
+    animation: none;
+  }
 }

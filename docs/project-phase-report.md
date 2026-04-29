@@ -1,7 +1,7 @@
 # Project Phase Report Index
 
 Last updated: 2026-04-28
-Current branch: `codex/category-date-search`
+Current branch: `codex/homepage-marquee-polish`
 
 This index links to a separate dated report file for each completed phase of the clinic discovery MVP.
 
@@ -19,12 +19,14 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - [Phase 8: Documentation and Project Reporting](./phases/2026-04-28-phase-8-documentation-project-reporting.md)
 - [Phase 9: Category and Date Availability Search](./phases/2026-04-28-phase-9-category-date-availability-search.md)
 - [Phase 10: Search UX Polish and Near-Me Discovery](./phases/2026-04-28-phase-10-search-ux-polish-and-near-me-discovery.md)
+- [Phase 11: Homepage Hero and Marquee Polish](./phases/2026-04-28-phase-11-homepage-hero-and-marquee-polish.md)
 
 ## Current Status
 
 - Category-based clinic discovery is working.
 - Homepage category + date availability search is working.
 - Homepage search now supports optional near-me behavior and a location dropdown.
+- Homepage hero now leads directly into the main search bar without duplicate category rails.
 - Responsive list + map browsing is working.
 - Google Maps integration is working.
 - Clinic storage is connected to Neon through Drizzle.
@@ -33,6 +35,7 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - Clinic detail drawer is working with keyboard and focus handling.
 - Results pages can filter clinics by mock available dates from the URL query.
 - Results pages can sort clinics by distance and show a user marker when location is shared.
+- Homepage categories and top clinics now use single-line marquee-style motion.
 
 ## MVP Scope Still Intentionally Excluded
 

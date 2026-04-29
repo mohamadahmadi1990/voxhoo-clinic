@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, MapPinned, SearchCheck, ShieldCheck, Stethoscope } from "lucide-react";
 import { CategoryIcon } from "@/components/category-icon";
-import { CategoryRail } from "@/components/category-rail";
 import { CategorySearch } from "@/components/category-search";
 import { DataNotice } from "@/components/data-notice";
 import { SiteHeader } from "@/components/site-header";
@@ -54,18 +53,12 @@ export default async function Home() {
               Clinic discovery, inspired by travel-style browsing
             </p>
             <h1 className="mt-5 text-balance text-5xl font-semibold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-              Find clinics the way people love to browse on modern marketplaces.
+              What Clinic are you looking for?
             </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-balance text-lg leading-8 text-muted-foreground">
-              Search fast, compare clearly, and move from category to list and map
-              without extra steps.
-            </p>
           </div>
 
           <CategorySearch categories={clinicCategories} />
         </section>
-
-        <CategoryRail categories={clinicCategories} />
 
         {topClinicsResult.warning ? (
           <section className="mx-auto w-full max-w-7xl px-6 pt-8 sm:px-8 lg:px-10">

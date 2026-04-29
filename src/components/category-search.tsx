@@ -301,22 +301,36 @@ export function CategorySearch({ categories }: CategorySearchProps) {
         {helperMessage}
       </p>
 
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
-        {categories.map((category) => (
-          <Link
-            key={category.slug}
-            href={buildClinicSearchHref(category.slug, {
-              date: selectedDate,
-              userLocation,
-            })}
-            className="group inline-flex items-center gap-3 rounded-full border border-border bg-white px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors group-hover:bg-accent group-hover:text-primary">
-              <CategoryIcon category={category.slug} className="h-4 w-4" />
+      <div className="relative mt-6 overflow-hidden">
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-background via-background/88 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-background via-background/88 to-transparent" />
+
+        <div className="category-marquee">
+          {[0, 1].map((copyIndex) => (
+            <div
+              key={copyIndex}
+              className="flex shrink-0 items-center gap-3 pr-3"
+              aria-hidden={copyIndex === 1}
+            >
+              {categories.map((category) => (
+                <Link
+                  key={`${copyIndex}-${category.slug}`}
+                  href={buildClinicSearchHref(category.slug, {
+                    date: selectedDate,
+                    userLocation,
+                  })}
+                  tabIndex={copyIndex === 1 ? -1 : undefined}
+                  className="group inline-flex shrink-0 items-center gap-3 rounded-full border border-border bg-white px-4 py-3 text-sm font-medium whitespace-nowrap text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors group-hover:bg-accent group-hover:text-primary">
+                    <CategoryIcon category={category.slug} className="h-4 w-4" />
+                  </div>
+                  <span>{category.label}</span>
+                </Link>
+              ))}
             </div>
-            <span>{category.label}</span>
-          </Link>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
