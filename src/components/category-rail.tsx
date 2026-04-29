@@ -16,7 +16,7 @@ export function CategoryRail({
 }: CategoryRailProps) {
   return (
     <div className="air-divider">
-      <div className="mx-auto flex w-full max-w-7xl gap-7 overflow-x-auto px-6 py-4 sm:px-8 lg:px-10">
+      <div className="mx-auto flex w-full max-w-7xl gap-5 overflow-x-auto px-4 py-3 [scrollbar-width:none] sm:gap-7 sm:px-8 sm:py-4 lg:px-10 [&::-webkit-scrollbar]:hidden">
         {categories.map((category) => {
           const isActive = category.slug === activeCategory;
 
@@ -25,7 +25,7 @@ export function CategoryRail({
               key={category.slug}
               href={`/clinics/${category.slug}${queryString}`}
               className={cn(
-                "group flex min-w-fit flex-col items-center gap-2 border-b-2 pb-3 text-sm transition-colors",
+                "group flex min-w-fit flex-col items-center gap-1.5 border-b-2 pb-2.5 text-[0.8rem] transition-colors sm:gap-2 sm:pb-3 sm:text-sm",
                 isActive
                   ? "border-foreground text-foreground"
                   : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
@@ -34,7 +34,7 @@ export function CategoryRail({
               <CategoryIcon
                 category={category.slug}
                 className={cn(
-                  "h-5 w-5 transition-transform group-hover:-translate-y-0.5",
+                  "h-4 w-4 transition-transform group-hover:-translate-y-0.5 sm:h-5 sm:w-5",
                   isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground",
                 )}
               />

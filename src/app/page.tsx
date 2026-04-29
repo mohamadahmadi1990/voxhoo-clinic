@@ -47,12 +47,12 @@ export default async function Home() {
     <>
       <SiteHeader showSearch={false} />
       <main className="min-h-screen">
-        <section className="mx-auto w-full max-w-7xl px-6 pb-10 pt-12 sm:px-8 lg:px-10">
+        <section className="mx-auto w-full max-w-7xl px-4 pb-8 pt-8 sm:px-8 sm:pb-10 sm:pt-12 lg:px-10">
           <div className="mx-auto max-w-4xl text-center">
             <p className="text-sm font-medium text-muted-foreground">
               Clinic discovery, inspired by travel-style browsing
             </p>
-            <h1 className="mt-5 text-balance text-5xl font-semibold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+            <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tight text-foreground sm:mt-5 sm:text-6xl lg:text-7xl">
               What Clinic are you looking for?
             </h1>
           </div>
@@ -61,17 +61,17 @@ export default async function Home() {
         </section>
 
         {topClinicsResult.warning ? (
-          <section className="mx-auto w-full max-w-7xl px-6 pt-8 sm:px-8 lg:px-10">
+          <section className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-8 sm:pt-8 lg:px-10">
             <DataNotice message={topClinicsResult.warning} />
           </section>
         ) : null}
 
         <TopClinicsCarousel clinics={topClinics} />
 
-        <section className="mx-auto w-full max-w-7xl px-6 py-10 sm:px-8 lg:px-10">
-          <div className="flex items-end justify-between gap-4">
+        <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-8 sm:py-10 lg:px-10">
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end sm:gap-4">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                 Browse by care type
               </h2>
               <p className="mt-2 text-muted-foreground">
@@ -84,7 +84,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid gap-4 sm:mt-8 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
             {clinicCategories.map((category) => {
               const theme = getCategoryTheme(category.slug);
 
@@ -94,13 +94,13 @@ export default async function Home() {
                   href={`/clinics/${category.slug}`}
                   className="group overflow-hidden rounded-[28px] border border-border bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(0,0,0,0.12)]"
                 >
-                  <div className={cn("relative h-44 px-5 py-5", theme.background)}>
+                  <div className={cn("relative h-40 px-4 py-4 sm:h-44 sm:px-5 sm:py-5", theme.background)}>
                     <div className="absolute inset-x-5 bottom-5 flex items-end justify-between">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                           Care Atlas
                         </p>
-                        <h3 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+                        <h3 className="mt-2 text-[1.35rem] font-semibold tracking-tight text-foreground sm:text-2xl">
                           {category.label}
                         </h3>
                       </div>
@@ -119,7 +119,7 @@ export default async function Home() {
                     </div>
                   </div>
 
-                  <div className="px-5 py-5">
+                  <div className="px-4 py-4 sm:px-5 sm:py-5">
                     <p className="text-sm leading-6 text-muted-foreground">
                       {category.description}
                     </p>
@@ -134,8 +134,8 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-6 pb-14 sm:px-8 lg:px-10">
-          <div className="grid gap-4 lg:grid-cols-3">
+        <section className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-8 sm:pb-14 lg:px-10">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {valueProps.map(({ title, description, icon: Icon }) => (
               <div
                 key={title}

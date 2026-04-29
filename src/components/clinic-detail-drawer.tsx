@@ -133,7 +133,7 @@ export function ClinicDetailDrawer({
         }}
       />
 
-      <div className="absolute inset-x-0 bottom-0 max-h-[88vh] rounded-t-[32px] bg-white shadow-[0_-18px_48px_rgba(0,0,0,0.22)] md:inset-y-0 md:left-auto md:max-h-none md:w-full md:max-w-xl md:rounded-l-[32px] md:rounded-r-none">
+      <div className="absolute inset-x-0 bottom-0 max-h-[92vh] rounded-t-[28px] bg-white shadow-[0_-18px_48px_rgba(0,0,0,0.22)] md:inset-y-0 md:left-auto md:max-h-none md:w-full md:max-w-xl md:rounded-l-[32px] md:rounded-r-none">
         <div
           ref={dialogRef}
           role="dialog"
@@ -145,14 +145,14 @@ export function ClinicDetailDrawer({
             event.stopPropagation();
           }}
         >
-          <div className={cn("relative overflow-hidden px-6 pb-6 pt-5", theme.background)}>
+          <div className={cn("relative overflow-hidden px-5 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5", theme.background)}>
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.96),transparent_38%)]" />
             <div className="relative z-10">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div
                     className={cn(
-                      "flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm",
+                      "flex h-11 w-11 items-center justify-center rounded-2xl shadow-sm sm:h-12 sm:w-12",
                       theme.iconBg,
                     )}
                   >
@@ -186,10 +186,10 @@ export function ClinicDetailDrawer({
                 </Button>
               </div>
 
-              <div className="mt-8">
+              <div className="mt-6 sm:mt-8">
                 <h2
                   id={titleId}
-                  className="max-w-lg text-3xl font-semibold tracking-tight text-foreground sm:text-[2.1rem]"
+                  className="max-w-lg text-2xl font-semibold tracking-tight text-foreground sm:text-[2.1rem]"
                 >
                   {clinic.name}
                 </h2>
@@ -201,7 +201,7 @@ export function ClinicDetailDrawer({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <section className="surface-soft rounded-[24px] px-5 py-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -246,7 +246,7 @@ export function ClinicDetailDrawer({
             </section>
           </div>
 
-          <div className="border-t border-border bg-white px-6 py-5">
+          <div className="border-t border-border bg-white px-5 py-4 sm:px-6 sm:py-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
               <a
                 href={dialHref}

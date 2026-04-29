@@ -23,8 +23,8 @@ export function SiteHeader({
 }: SiteHeaderProps) {
   return (
     <header className={cn("sticky top-0 z-40 bg-background/95 backdrop-blur-md air-divider", className)}>
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-8 py-2 sm:px-10 lg:px-14">
-        <Link href="/" className="inline-flex items-center gap-3">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-8 lg:px-14">
+        <Link href="/" className="inline-flex items-center gap-2.5 sm:gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Cross className="h-3 w-3" />
           </div>

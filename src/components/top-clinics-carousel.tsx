@@ -39,10 +39,10 @@ export function TopClinicsCarousel({ clinics }: TopClinicsCarouselProps) {
   }
 
   return (
-    <section className="mx-auto w-full max-w-7xl px-6 py-10 sm:px-8 lg:px-10">
+    <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-8 sm:py-10 lg:px-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Top clinics right now
           </h2>
           <p className="mt-2 text-muted-foreground">
@@ -50,7 +50,7 @@ export function TopClinicsCarousel({ clinics }: TopClinicsCarouselProps) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="hidden items-center gap-2 sm:flex">
           <Button
             type="button"
             variant="outline"
@@ -80,10 +80,10 @@ export function TopClinicsCarousel({ clinics }: TopClinicsCarouselProps) {
 
       <div
         ref={railRef}
-        className="relative mt-8 overflow-x-hidden pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="relative mt-6 overflow-x-hidden pb-4 [scrollbar-width:none] sm:mt-8 [&::-webkit-scrollbar]:hidden"
       >
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-background via-background/88 to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-background via-background/88 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-background via-background/88 to-transparent sm:w-12" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-background via-background/88 to-transparent sm:w-12" />
 
         <div className="top-clinics-marquee">
           <div className="flex shrink-0 items-stretch gap-5 pr-5">
@@ -105,9 +105,9 @@ function renderClinicCard(clinic: ClinicListItem, isDuplicate = false) {
   return (
     <article
       key={`${isDuplicate ? "duplicate" : "primary"}-${clinic.id}`}
-      className="min-w-[320px] max-w-[320px] shrink-0 overflow-hidden rounded-[28px] border border-border bg-white shadow-[0_12px_28px_rgba(0,0,0,0.1)] transition-transform duration-200 hover:-translate-y-1 sm:min-w-[360px] sm:max-w-[360px]"
+      className="min-w-[280px] max-w-[280px] shrink-0 overflow-hidden rounded-[24px] border border-border bg-white shadow-[0_12px_28px_rgba(0,0,0,0.1)] transition-transform duration-200 hover:-translate-y-1 sm:min-w-[360px] sm:max-w-[360px] sm:rounded-[28px]"
     >
-      <div className={cn("relative h-52 px-5 py-5", theme.background)}>
+      <div className={cn("relative h-44 px-4 py-4 sm:h-52 sm:px-5 sm:py-5", theme.background)}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.96),transparent_34%)]" />
         <div className="relative z-10 flex h-full flex-col justify-between">
           <div className="flex items-start justify-between gap-3">
@@ -131,14 +131,14 @@ function renderClinicCard(clinic: ClinicListItem, isDuplicate = false) {
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
               {categoryLabelMap[clinic.category]}
             </p>
-            <h3 className="mt-2 text-2xl font-semibold leading-tight tracking-tight text-foreground">
+            <h3 className="mt-2 text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">
               {clinic.name}
             </h3>
           </div>
         </div>
       </div>
 
-      <div className="space-y-4 px-5 py-5">
+      <div className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
         <div className="flex items-center justify-between gap-3">
           <div className="rounded-full bg-secondary px-3 py-2 text-sm font-medium text-foreground">
             {categoryLabelMap[clinic.category]}
@@ -159,14 +159,14 @@ function renderClinicCard(clinic: ClinicListItem, isDuplicate = false) {
           {clinic.phone}
         </div>
 
-        <div className="flex items-center justify-between gap-3 pt-1">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col items-start gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground sm:max-w-[12rem]">
             Explore this category on the map.
           </p>
           <Link
             href={`/clinics/${clinic.category}`}
             tabIndex={isDuplicate ? -1 : undefined}
-            className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition-colors hover:bg-foreground/88"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition-colors hover:bg-foreground/88 sm:w-auto"
           >
             View
             <ArrowRight className="h-4 w-4" />

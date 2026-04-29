@@ -103,9 +103,9 @@ export function ClinicResultsView({
 
   return (
     <>
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)]">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)]">
         <div className="order-1 space-y-4 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto lg:pr-2">
-          <div className="flex items-center justify-between gap-4 px-1">
+          <div className="flex flex-col items-start justify-between gap-3 px-1 sm:flex-row sm:items-center sm:gap-4">
             <div>
               <h2 className="text-lg font-semibold text-foreground">Clinic list</h2>
               <p className="text-sm text-muted-foreground">
@@ -127,8 +127,8 @@ export function ClinicResultsView({
           </div>
 
           {clinics.length === 0 ? (
-            <Card className="surface-panel rounded-[28px] border border-border py-0">
-              <CardContent className="px-6 py-8 text-sm leading-7 text-muted-foreground">
+            <Card className="surface-panel rounded-[24px] border border-border py-0 sm:rounded-[28px]">
+              <CardContent className="px-5 py-7 text-sm leading-7 text-muted-foreground sm:px-6 sm:py-8">
                 {selectedDateLabel
                   ? `No ${categoryLabel.toLowerCase()} clinics show mock availability on ${selectedDateLabel}. Try another date or browse the category without a date filter.`
                   : "No clinics are available in this category right now. Try another care type or check back after more clinics are added."}
@@ -160,14 +160,14 @@ export function ClinicResultsView({
                     }
                   }}
                   className={cn(
-                    "cursor-pointer overflow-hidden rounded-[28px] border border-border bg-white py-0 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(0,0,0,0.12)]",
+                    "cursor-pointer overflow-hidden rounded-[24px] border border-border bg-white py-0 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(0,0,0,0.12)] sm:rounded-[28px]",
                     isActive
                       ? "border-primary/30 shadow-[0_18px_34px_rgba(255,56,92,0.16)] ring-2 ring-primary/16 ring-offset-2 ring-offset-transparent"
                       : "",
                   )}
                 >
                   <div className="grid gap-0 md:grid-cols-[260px_minmax(0,1fr)]">
-                    <div className={cn("relative min-h-[220px] px-5 py-5", theme.background)}>
+                    <div className={cn("relative min-h-[180px] px-4 py-4 sm:min-h-[220px] sm:px-5 sm:py-5", theme.background)}>
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.95),transparent_36%)]" />
                       <div className="relative z-10 flex h-full flex-col justify-between">
                         <div className="flex items-start justify-between gap-3">
@@ -191,7 +191,7 @@ export function ClinicResultsView({
                           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                             Care Atlas pick
                           </p>
-                          <p className="mt-2 text-4xl font-semibold tracking-tight text-foreground">
+                          <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
                             {String(index + 1).padStart(2, "0")}
                           </p>
                         </div>
@@ -199,10 +199,10 @@ export function ClinicResultsView({
                     </div>
 
                     <div className="flex flex-col">
-                      <CardHeader className="pt-5">
+                      <CardHeader className="pt-4 sm:pt-5">
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <CardTitle className="text-[1.32rem] font-semibold leading-8">
+                            <CardTitle className="text-[1.15rem] font-semibold leading-7 sm:text-[1.32rem] sm:leading-8">
                               {clinic.name}
                             </CardTitle>
                             <p className="mt-1 text-sm text-muted-foreground">
@@ -217,7 +217,7 @@ export function ClinicResultsView({
                         </div>
                       </CardHeader>
 
-                      <CardContent className="flex-1 space-y-4 pb-5">
+                      <CardContent className="flex-1 space-y-4 pb-4 sm:pb-5">
                         <div className="flex items-start gap-3 text-sm leading-6 text-muted-foreground">
                           <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                           <span>{clinic.address}</span>
@@ -240,15 +240,15 @@ export function ClinicResultsView({
                         </div>
                       </CardContent>
 
-                      <CardFooter className="justify-between border-t border-border bg-white">
-                        <p className="text-sm text-muted-foreground">
+                      <CardFooter className="flex-col items-start gap-4 border-t border-border bg-white sm:flex-row sm:items-center sm:justify-between">
+                        <p className="max-w-md text-sm text-muted-foreground">
                           Compare this clinic on the map with the rest of the category.
                         </p>
                         <Button
                           type="button"
                           variant={isActive ? "default" : "secondary"}
                           size="lg"
-                          className="rounded-full px-5"
+                          className="w-full rounded-full px-5 sm:w-auto"
                           onClick={(event) => {
                             event.stopPropagation();
                             openClinicDetails(clinic.id, event.currentTarget);
@@ -270,8 +270,8 @@ export function ClinicResultsView({
           tabIndex={-1}
           className="order-2 lg:sticky lg:top-6 lg:self-start"
         >
-          <div className="surface-panel overflow-hidden rounded-[28px] border border-border p-3">
-            <div className="flex items-center justify-between gap-4 px-3 pb-3 pt-1">
+          <div className="surface-panel overflow-hidden rounded-[24px] border border-border p-2.5 sm:rounded-[28px] sm:p-3">
+            <div className="flex flex-col items-start justify-between gap-3 px-2.5 pb-3 pt-1 sm:flex-row sm:items-center sm:gap-4 sm:px-3">
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Map view</h2>
                 <p className="text-sm text-muted-foreground">
@@ -289,7 +289,7 @@ export function ClinicResultsView({
               </div>
             </div>
 
-            <div className="h-[380px] overflow-hidden rounded-[24px] bg-secondary shadow-inner lg:h-[calc(100vh-12rem)]">
+            <div className="h-[300px] overflow-hidden rounded-[22px] bg-secondary shadow-inner sm:h-[360px] sm:rounded-[24px] lg:h-[calc(100vh-12rem)]">
               <ClinicMap
                 clinics={clinics}
                 activeClinicId={activeClinicId}

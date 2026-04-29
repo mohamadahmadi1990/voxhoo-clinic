@@ -1,7 +1,7 @@
 # Project Phase Report Index
 
 Last updated: 2026-04-29
-Current branch: `codex/results-filter-polish`
+Current branch: `codex/mobile-friendly-pass`
 
 This index links to a separate dated report file for each completed phase of the clinic discovery MVP.
 
@@ -21,6 +21,7 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - [Phase 10: Search UX Polish and Near-Me Discovery](./phases/2026-04-28-phase-10-search-ux-polish-and-near-me-discovery.md)
 - [Phase 11: Homepage Hero and Marquee Polish](./phases/2026-04-28-phase-11-homepage-hero-and-marquee-polish.md)
 - [Phase 12: Location-Aware Results and Header Search Refinement](./phases/2026-04-29-phase-12-location-aware-results-and-header-search-refinement.md)
+- [Phase 13: Mobile-Friendly Responsive Pass](./phases/2026-04-29-phase-13-mobile-friendly-responsive-pass.md)
 
 ## Current Status
 
@@ -38,6 +39,7 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - Results pages can sort clinics by distance and show a user marker when location is shared.
 - Results pages can now prioritize clinics by named area and gracefully fall back when an area has no exact matches.
 - The results header now uses a compact working search bar with the current category, date, and location prefilled.
+- Homepage and results browsing now adapt more cleanly to smaller screens with a mobile-focused refine-search flow.
 - Homepage categories and top clinics now use single-line marquee-style motion.
 
 ## MVP Scope Still Intentionally Excluded
@@ -51,7 +53,6 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 
 ## Recommended Next Steps
 
-- Make the app genuinely mobile-friendly across homepage, results, drawer, and map interactions.
 - Decide whether area metadata should stay mock/app-layer only or move into the database schema next.
 - Add basic list sorting such as highest rated or alphabetical.
 - Add lightweight automated tests around category/date/location filtering and fallback behavior.

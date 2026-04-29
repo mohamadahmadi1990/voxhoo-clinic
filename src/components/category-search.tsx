@@ -159,26 +159,26 @@ export function CategorySearch({
       : selectedLocationLabel ?? "Current location";
   const containerClass = isCompact
     ? "mx-auto w-full max-w-[760px]"
-    : "mx-auto mt-10 w-full max-w-5xl";
+    : "mx-auto mt-8 w-full max-w-5xl sm:mt-10";
   const formClass = isCompact
-    ? "rounded-full border border-border bg-white px-2.5 py-[3px] shadow-[0_5px_14px_rgba(0,0,0,0.08)]"
-    : "rounded-[32px] border border-border bg-white p-2 shadow-[0_10px_36px_rgba(0,0,0,0.12)] md:rounded-full";
+    ? "rounded-[22px] border border-border bg-white px-2 py-[3px] shadow-[0_5px_14px_rgba(0,0,0,0.08)] md:rounded-full md:px-2.5"
+    : "rounded-[28px] border border-border bg-white p-1.5 shadow-[0_10px_36px_rgba(0,0,0,0.12)] sm:p-2 md:rounded-full";
   const gridClass = isCompact
     ? "grid gap-1 md:grid-cols-[minmax(0,1.12fr)_minmax(182px,0.8fr)_minmax(174px,0.76fr)_auto] md:gap-0 md:items-stretch"
-    : "grid gap-2 md:grid-cols-[minmax(0,1.05fr)_minmax(240px,0.9fr)_minmax(220px,0.85fr)_auto] md:gap-0 md:items-stretch";
+    : "grid gap-1.5 sm:gap-2 md:grid-cols-[minmax(0,1.05fr)_minmax(240px,0.9fr)_minmax(220px,0.85fr)_auto] md:gap-0 md:items-stretch";
   const segmentClass = isCompact
-    ? "relative flex min-h-[46px] flex-col justify-center px-2.5 py-1.5 text-left transition-colors duration-200 hover:bg-secondary focus-within:bg-secondary md:min-h-[44px] md:rounded-none md:px-3 md:py-1.5"
-    : "relative flex min-h-[84px] flex-col justify-center px-5 py-4 text-left transition-colors duration-200 hover:bg-secondary focus-within:bg-secondary md:min-h-[80px] md:rounded-none md:px-6 md:py-4";
+    ? "relative flex min-h-[56px] flex-col justify-center px-3 py-2 text-left transition-colors duration-200 hover:bg-secondary focus-within:bg-secondary sm:min-h-[52px] md:min-h-[44px] md:rounded-none md:px-3 md:py-1.5"
+    : "relative flex min-h-[72px] flex-col justify-center px-4 py-3 text-left transition-colors duration-200 hover:bg-secondary focus-within:bg-secondary sm:min-h-[84px] sm:px-5 sm:py-4 md:min-h-[80px] md:rounded-none md:px-6 md:py-4";
   const segmentLabelClass = isCompact
-    ? "text-[0.54rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
-    : "text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground";
+    ? "text-[0.58rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+    : "text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-[0.7rem] sm:tracking-[0.18em]";
   const segmentValueClass = isCompact
-    ? "mt-0.5 text-[0.8rem] font-medium text-foreground"
-    : "mt-1 text-[0.98rem] font-medium text-foreground";
-  const triggerTextClass = isCompact ? "text-[0.8rem]" : "text-base";
+    ? "mt-0.5 text-[0.9rem] font-medium text-foreground md:text-[0.8rem]"
+    : "mt-1 text-[0.92rem] font-medium text-foreground sm:text-[0.98rem]";
+  const triggerTextClass = isCompact ? "text-[0.9rem] md:text-[0.8rem]" : "text-[0.92rem] sm:text-base";
   const submitButtonClass = isCompact
-    ? "mx-auto size-8 rounded-full p-0 md:ml-0.5 md:mr-0 md:self-center"
-    : "mx-auto size-16 rounded-full p-0 md:ml-2 md:mr-0 md:self-center";
+    ? "h-10 w-full rounded-[18px] p-0 md:ml-0.5 md:mr-0 md:size-8 md:self-center md:rounded-full"
+    : "h-12 w-full rounded-[18px] p-0 sm:h-14 md:ml-2 md:mr-0 md:size-16 md:self-center md:rounded-full";
 
   return (
     <div className={cn(containerClass, className)}>
@@ -253,7 +253,7 @@ export function CategorySearch({
                   <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
                 </PopoverTrigger>
                 <PopoverContent
-                  className="w-[308px] overflow-hidden rounded-[28px] border border-border bg-white p-0"
+                  className="w-[min(308px,calc(100vw-2rem))] overflow-hidden rounded-[28px] border border-border bg-white p-0"
                   sideOffset={12}
                 >
                   <div className="bg-white">
@@ -349,7 +349,7 @@ export function CategorySearch({
             aria-label="Search clinics"
             className={submitButtonClass}
           >
-            <Search className={isCompact ? "h-3.5 w-3.5" : "h-5 w-5"} />
+            <Search className={isCompact ? "h-3.5 w-3.5" : "h-[18px] w-[18px] sm:h-5 sm:w-5"} />
           </Button>
         </div>
       </form>
@@ -361,9 +361,9 @@ export function CategorySearch({
       ) : null}
 
       {showCategoryMarquee ? (
-        <div className="relative mt-6 overflow-hidden">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-background via-background/88 to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-background via-background/88 to-transparent" />
+        <div className="relative mt-5 overflow-hidden sm:mt-6">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-background via-background/88 to-transparent sm:w-12" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-background via-background/88 to-transparent sm:w-12" />
 
           <div className="category-marquee">
             {[0, 1].map((copyIndex) => (
@@ -381,9 +381,9 @@ export function CategorySearch({
                       userLocation,
                     })}
                     tabIndex={copyIndex === 1 ? -1 : undefined}
-                    className="group inline-flex shrink-0 items-center gap-3 rounded-full border border-border bg-white px-4 py-3 text-sm font-medium whitespace-nowrap text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                    className="group inline-flex shrink-0 items-center gap-3 rounded-full border border-border bg-white px-3.5 py-2.5 text-sm font-medium whitespace-nowrap text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:px-4 sm:py-3"
                   >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors group-hover:bg-accent group-hover:text-primary">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors group-hover:bg-accent group-hover:text-primary sm:h-9 sm:w-9">
                       <CategoryIcon category={category.slug} className="h-4 w-4" />
                     </div>
                     <span>{category.label}</span>
