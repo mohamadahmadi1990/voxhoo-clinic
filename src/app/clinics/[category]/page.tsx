@@ -10,10 +10,10 @@ import { SiteHeader } from "@/components/site-header";
 import { buttonVariants } from "@/components/ui/button";
 import { getClinicsByCategorySafe } from "@/db";
 import { clinicCategories, getCategoryBySlug } from "@/lib/clinic-categories";
+import { refineClinicsForResults } from "@/lib/clinic-results";
 import {
   buildClinicSearchQuery,
   formatSearchDateLabel,
-  getDistanceInKilometers,
   normalizeLocationParam,
   normalizeSearchDateParam,
   normalizeUserLocationParams,
@@ -66,24 +66,12 @@ export default async function ClinicsByCategoryPage({
   const selectedDate = normalizeSearchDateParam(date);
   const selectedLocation = normalizeLocationParam(location);
   const userLocation = normalizeUserLocationParams({ lat, lng });
-  const clinicsForDate = selectedDate
-    ? clinicsResult.clinics.filter((clinic) => clinic.availableDates.includes(selectedDate))
-    : clinicsResult.clinics;
-  const exactAreaClinics = selectedLocation
-    ? clinicsForDate.filter((clinic) => clinic.area === selectedLocation.label)
-    : clinicsForDate;
-  const isLocationFallback =
-    Boolean(selectedLocation) && clinicsForDate.length > 0 && exactAreaClinics.length === 0;
-
-  let clinics = exactAreaClinics;
-
-  if (isLocationFallback && selectedLocation) {
-    clinics = sortClinicsByDistance(clinicsForDate, selectedLocation.center);
-  }
-
-  if (userLocation) {
-    clinics = sortClinicsByDistance(clinics, userLocation);
-  }
+  const { clinics, isLocationFallback } = refineClinicsForResults({
+    clinics: clinicsResult.clinics,
+    selectedDate,
+    selectedLocation,
+    userLocation,
+  });
 
   const selectedDateLabel = selectedDate
     ? formatSearchDateLabel(selectedDate)
@@ -204,20 +192,4 @@ export default async function ClinicsByCategoryPage({
       </main>
     </>
   );
-}
-
-function sortClinicsByDistance<T extends { lat: number; lng: number; name: string }>(
-  clinics: T[],
-  origin: { lat: number; lng: number },
-) {
-  return [...clinics].sort((left, right) => {
-    const leftDistance = getDistanceInKilometers(origin, left);
-    const rightDistance = getDistanceInKilometers(origin, right);
-
-    if (leftDistance !== rightDistance) {
-      return leftDistance - rightDistance;
-    }
-
-    return left.name.localeCompare(right.name);
-  });
 }

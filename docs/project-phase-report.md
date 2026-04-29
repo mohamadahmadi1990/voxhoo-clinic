@@ -1,7 +1,7 @@
 # Project Phase Report Index
 
 Last updated: 2026-04-29
-Current branch: `codex/mobile-friendly-pass`
+Current branch: `codex/business-plan-baseline`
 
 This index links to a separate dated report file for each completed phase of the clinic discovery MVP.
 
@@ -22,6 +22,8 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - [Phase 11: Homepage Hero and Marquee Polish](./phases/2026-04-28-phase-11-homepage-hero-and-marquee-polish.md)
 - [Phase 12: Location-Aware Results and Header Search Refinement](./phases/2026-04-29-phase-12-location-aware-results-and-header-search-refinement.md)
 - [Phase 13: Mobile-Friendly Responsive Pass](./phases/2026-04-29-phase-13-mobile-friendly-responsive-pass.md)
+- [Phase 14: Lightweight Results and Fallback Test Coverage](./phases/2026-04-29-phase-14-lightweight-results-and-fallback-test-coverage.md)
+- [Phase 15: Business Plan Readiness Baseline](./phases/2026-04-29-phase-15-business-plan-readiness-baseline.md)
 
 ## Current Status
 
@@ -41,6 +43,8 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - The results header now uses a compact working search bar with the current category, date, and location prefilled.
 - Homepage and results browsing now adapt more cleanly to smaller screens with a mobile-focused refine-search flow.
 - Homepage categories and top clinics now use single-line marquee-style motion.
+- Lightweight automated coverage now validates results refinement behavior and missing-database fallback handling.
+- A clean continuation branch and validation baseline are now recorded for ongoing Codex work.
 
 ## MVP Scope Still Intentionally Excluded
 
@@ -55,5 +59,5 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 
 - Decide whether area metadata should stay mock/app-layer only or move into the database schema next.
 - Add basic list sorting such as highest rated or alphabetical.
-- Add lightweight automated tests around category/date/location filtering and fallback behavior.
+- Expand coverage beyond core helpers into broader route or user-flow tests when the MVP behavior stabilizes further.
 - Consider whether named-area filtering should eventually connect to richer geographic or clinic-level metadata.
