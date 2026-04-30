@@ -117,7 +117,7 @@ export function ClinicResultsView({
   return (
     <>
       <section className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)]">
-        <div className="order-1 space-y-4 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto lg:pr-2">
+        <div className="order-2 space-y-4 lg:order-1 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto lg:pr-2">
           <div className="flex flex-col items-start justify-between gap-3 px-1 sm:flex-row sm:items-center sm:gap-4">
             <div>
               <h2 className="text-lg font-semibold text-foreground">Clinic list</h2>
@@ -266,7 +266,7 @@ export function ClinicResultsView({
         <div
           ref={mapSectionRef}
           tabIndex={-1}
-          className="order-2 lg:sticky lg:top-6 lg:self-start"
+          className="order-1 lg:order-2 lg:sticky lg:top-6 lg:self-start"
         >
           <div className="surface-panel overflow-hidden rounded-[24px] border border-border p-2.5 sm:rounded-[28px] sm:p-3">
             <div className="flex flex-col items-start justify-between gap-3 px-2.5 pb-3 pt-1 sm:flex-row sm:items-center sm:gap-4 sm:px-3">
