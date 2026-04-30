@@ -117,7 +117,7 @@ export function ClinicResultsView({
   return (
     <>
       <section className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)]">
-        <div className="order-2 space-y-4 lg:order-1 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto lg:pr-2">
+        <div className="order-2 space-y-4 scrollbar-hide lg:order-1 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto lg:pr-2">
           <div className="flex flex-col items-start justify-between gap-3 px-1 sm:flex-row sm:items-center sm:gap-4">
             <div>
               <h2 className="text-lg font-semibold text-foreground">Clinic list</h2>
@@ -268,26 +268,8 @@ export function ClinicResultsView({
           tabIndex={-1}
           className="order-1 lg:order-2 lg:sticky lg:top-6 lg:self-start"
         >
-          <div className="surface-panel overflow-hidden rounded-[24px] border border-border p-2.5 sm:rounded-[28px] sm:p-3">
-            <div className="flex flex-col items-start justify-between gap-3 px-2.5 pb-3 pt-1 sm:flex-row sm:items-center sm:gap-4 sm:px-3">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Map view</h2>
-                <p className="text-sm text-muted-foreground">
-                  {userLocation
-                    ? "Your location is marked on the map, and pins stay sorted by distance in the list."
-                    : selectedLocationLabel
-                      ? `Map centered around ${selectedLocationLabel}.`
-                    : "Tap a pin to highlight the matching clinic card."}
-                </p>
-              </div>
-              <div className="rounded-full bg-white/72 px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary shadow-sm">
-                {userLocation
-                  ? "Near you"
-                  : selectedLocationLabel ?? "Interactive map"}
-              </div>
-            </div>
-
-            <div className="h-[300px] overflow-hidden rounded-[22px] bg-secondary shadow-inner sm:h-[360px] sm:rounded-[24px] lg:h-[calc(100vh-12rem)]">
+          <div className="overflow-hidden rounded-[24px] sm:rounded-[28px]">
+            <div className="h-[300px] overflow-hidden rounded-[22px] sm:h-[360px] sm:rounded-[24px] lg:h-[calc(100vh-9rem)]">
               <ClinicMap
                 clinics={clinics}
                 activeClinicId={activeClinicId}

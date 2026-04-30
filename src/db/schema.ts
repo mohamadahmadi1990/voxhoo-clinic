@@ -10,6 +10,7 @@ export const clinics = pgTable("clinics", {
   name: text("name").notNull(),
   category: clinicCategoryEnum("category").notNull(),
   address: text("address").notNull(),
+  area: text("area"),
   lat: doublePrecision("lat").notNull(),
   lng: doublePrecision("lng").notNull(),
   rating: doublePrecision("rating").notNull(),
