@@ -1,5 +1,7 @@
 import {
+  clinicAreas,
   getDistanceInKilometers,
+  type ClinicSortOption,
   type ClinicArea,
   type UserLocation,
 } from "./clinic-search";
@@ -10,6 +12,7 @@ type ClinicResultListItem = {
   lat: number;
   lng: number;
   name: string;
+  rating: number;
 };
 
 export function refineClinicsForResults<T extends ClinicResultListItem>({
@@ -17,11 +20,13 @@ export function refineClinicsForResults<T extends ClinicResultListItem>({
   selectedDate,
   selectedLocation,
   userLocation,
+  sort = "nearest",
 }: {
   clinics: T[];
   selectedDate?: string | null;
   selectedLocation?: ClinicArea | null;
   userLocation?: UserLocation | null;
+  sort?: ClinicSortOption;
 }) {
   const clinicsForDate = selectedDate
     ? clinics.filter((clinic) => clinic.availableDates.includes(selectedDate))
@@ -42,10 +47,48 @@ export function refineClinicsForResults<T extends ClinicResultListItem>({
     refinedClinics = sortClinicsByDistance(refinedClinics, userLocation);
   }
 
+  refinedClinics = sortClinics(refinedClinics, {
+    sort,
+    selectedLocation,
+    userLocation,
+  });
+
   return {
     clinics: refinedClinics,
     isLocationFallback,
   };
+}
+
+function sortClinics<T extends { lat: number; lng: number; name: string; rating: number }>(
+  clinics: T[],
+  {
+    sort,
+    selectedLocation,
+    userLocation,
+  }: {
+    sort: ClinicSortOption;
+    selectedLocation?: ClinicArea | null;
+    userLocation?: UserLocation | null;
+  },
+) {
+  if (sort === "rating") {
+    return [...clinics].sort((left, right) => {
+      if (right.rating !== left.rating) {
+        return right.rating - left.rating;
+      }
+
+      return left.name.localeCompare(right.name);
+    });
+  }
+
+  if (sort === "name") {
+    return [...clinics].sort((left, right) => left.name.localeCompare(right.name));
+  }
+
+  return sortClinicsByDistance(
+    clinics,
+    userLocation ?? selectedLocation?.center ?? clinicAreas[0].center,
+  );
 }
 
 export function sortClinicsByDistance<T extends { lat: number; lng: number; name: string }>(

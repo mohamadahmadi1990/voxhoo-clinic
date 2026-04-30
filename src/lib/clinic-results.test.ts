@@ -9,6 +9,7 @@ const sampleClinics = [
     area: "Toronto",
     lat: 43.65,
     lng: -79.39,
+    rating: 4.7,
     availableDates: ["2026-05-10", "2026-05-12"],
   },
   {
@@ -17,6 +18,7 @@ const sampleClinics = [
     area: "North York",
     lat: 43.76,
     lng: -79.41,
+    rating: 4.9,
     availableDates: ["2026-05-11"],
   },
   {
@@ -25,6 +27,7 @@ const sampleClinics = [
     area: "Toronto",
     lat: 43.64,
     lng: -79.52,
+    rating: 4.5,
     availableDates: ["2026-05-10"],
   },
 ];

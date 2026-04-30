@@ -156,7 +156,7 @@ function renderClinicCard(clinic: ClinicListItem, isDuplicate = false) {
 
         <div className="inline-flex items-center gap-2 text-sm text-foreground">
           <Phone className="h-4 w-4 text-primary" />
-          {clinic.phone}
+          {clinic.phone || "Phone unavailable"}
         </div>
 
         <div className="flex flex-col items-start gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">

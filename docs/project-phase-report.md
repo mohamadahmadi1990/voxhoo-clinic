@@ -1,7 +1,7 @@
 # Project Phase Report Index
 
 Last updated: 2026-04-29
-Current branch: `codex/business-plan-baseline`
+Current branch: `codex/phase-19-kickoff`
 
 This index links to a separate dated report file for each completed phase of the clinic discovery MVP.
 
@@ -27,6 +27,8 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - [Phase 16: Voxhoo Clinic Rename and GitHub Fork Preparation](./phases/2026-04-29-phase-16-voxhoo-clinic-rename-and-github-fork-preparation.md)
 - [Phase 17: Voxhoo Clinic GitHub Repository Launch](./phases/2026-04-29-phase-17-voxhoo-clinic-github-repository-launch.md)
 - [Phase 18: Canonical Repository Switch and Historical Repo Note](./phases/2026-04-29-phase-18-canonical-repository-switch-and-historical-repo-note.md)
+- [Phase 19: Google Places Live Clinic Search](./phases/2026-04-29-phase-19-google-places-live-clinic-search.md)
+- [Phase 20: Google Places Neon Import Script](./phases/2026-04-30-phase-20-google-places-neon-import-script.md)
 
 ## Current Status
 
@@ -36,9 +38,10 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - Homepage hero now leads directly into the main search bar without duplicate category rails.
 - Responsive list + map browsing is working.
 - Google Maps integration is working.
-- Clinic storage is connected to Neon through Drizzle.
-- The app now falls back to sample Toronto clinic data if live DB access fails.
-- Homepage featured clinic data refreshes automatically every 60 seconds.
+- Live clinic search now uses Google Places server-side fetches.
+- A DB-side import script can now save Google Places clinics into the Neon `clinics` table without changing the UI flow.
+- The app now falls back to sample Toronto clinic data if Google Places is missing or temporarily unavailable.
+- Homepage featured clinics and category results now fetch live data without caching.
 - Clinic detail drawer is working with keyboard and focus handling.
 - Results pages can filter clinics by mock available dates from the URL query.
 - Results pages can sort clinics by distance and show a user marker when location is shared.
@@ -46,7 +49,7 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - The results header now uses a compact working search bar with the current category, date, and location prefilled.
 - Homepage and results browsing now adapt more cleanly to smaller screens with a mobile-focused refine-search flow.
 - Homepage categories and top clinics now use single-line marquee-style motion.
-- Lightweight automated coverage now validates results refinement behavior and missing-database fallback handling.
+- Lightweight automated coverage now validates results refinement behavior, Google Places helper logic, and missing-API fallback handling.
 - A clean continuation branch and validation baseline are now recorded for ongoing Codex work.
 - The project branding now uses Voxhoo Clinic across the app and current docs.
 - A new public GitHub home now exists at `mohamadahmadi1990/voxhoo-clinic`.
@@ -64,7 +67,8 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 
 ## Recommended Next Steps
 
-- Decide whether area metadata should stay mock/app-layer only or move into the database schema next.
+- Decide whether Google Places results should eventually be cached, persisted, or both.
+- Decide when imported Neon clinic data should become part of the live runtime path instead of remaining an optional script workflow.
 - Add basic list sorting such as highest rated or alphabetical.
 - Expand coverage beyond core helpers into broader route or user-flow tests when the MVP behavior stabilizes further.
 - Consider whether named-area filtering should eventually connect to richer geographic or clinic-level metadata.

@@ -6,6 +6,10 @@ export type UserLocation = {
   lng: number;
 };
 
+export const clinicSortOptions = ["nearest", "rating", "name"] as const;
+
+export type ClinicSortOption = (typeof clinicSortOptions)[number];
+
 export const clinicAreaSlugs = [
   "toronto",
   "north-york",
@@ -101,10 +105,12 @@ export function buildClinicSearchQuery({
   date,
   location,
   userLocation,
+  sort,
 }: {
   date?: Date | string | null;
   location?: ClinicAreaSlug | null;
   userLocation?: UserLocation | null;
+  sort?: ClinicSortOption | null;
 }) {
   const params = new URLSearchParams();
   const normalizedDate =
@@ -127,6 +133,10 @@ export function buildClinicSearchQuery({
     params.set("lng", formatCoordinate(userLocation.lng));
   }
 
+  if (sort && sort !== "nearest") {
+    params.set("sort", sort);
+  }
+
   const query = params.toString();
 
   return query ? `?${query}` : "";
@@ -138,6 +148,7 @@ export function buildClinicSearchHref(
     date?: Date | string | null;
     location?: ClinicAreaSlug | null;
     userLocation?: UserLocation | null;
+    sort?: ClinicSortOption | null;
   },
 ) {
   return `/clinics/${category}${buildClinicSearchQuery(options ?? {})}`;
@@ -151,8 +162,29 @@ export function normalizeLocationParam(value: SearchParamValue) {
   return getClinicAreaBySlug(value);
 }
 
+export function normalizeSortParam(value: SearchParamValue): ClinicSortOption {
+  if (typeof value !== "string") {
+    return "nearest";
+  }
+
+  return clinicSortOptions.find((option) => option === value) ?? "nearest";
+}
+
 export function getClinicAreaBySlug(slug: string) {
   return clinicAreas.find((area) => area.slug === slug) ?? null;
+}
+
+export function getNearestClinicArea(location: UserLocation) {
+  return clinicAreas.reduce((nearestArea, area) => {
+    if (!nearestArea) {
+      return area;
+    }
+
+    const currentDistance = getDistanceInKilometers(location, area.center);
+    const nearestDistance = getDistanceInKilometers(location, nearestArea.center);
+
+    return currentDistance < nearestDistance ? area : nearestArea;
+  }, clinicAreas[0]);
 }
 
 export function normalizeUserLocationParams({

@@ -22,9 +22,9 @@ Current stack:
 - TypeScript
 - Tailwind CSS
 - shadcn/ui
+- Google Places API
 - Google Maps JavaScript API
-- Neon Postgres
-- Drizzle ORM
+- Neon Postgres and Drizzle ORM for optional future database scripts
 
 Project progress reports live in [docs/project-phase-report.md](./docs/project-phase-report.md).
 
@@ -44,44 +44,59 @@ npm install
 2. Copy `.env.example` to `.env.local`, then replace the placeholder values:
 
 ```env
-DATABASE_URL=postgresql://username:password@host.neon.tech/dbname?sslmode=require
+GOOGLE_PLACES_API_KEY=your_google_places_api_key
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 ```
 
-3. Push the schema to Neon:
-
-```bash
-npm run db:push
-```
-
-4. Seed the sample Toronto clinics:
-
-```bash
-npm run db:seed
-```
-
-5. Start the development server:
+3. Start the development server:
 
 ```bash
 npm run dev
 ```
 
-6. Open [http://localhost:3000](http://localhost:3000)
+4. Open [http://localhost:3000](http://localhost:3000)
+
+5. Optional: if you still want to run the historical Neon/Drizzle scripts, add `DATABASE_URL` to `.env.local` and then use:
+
+```bash
+npm run db:push
+npm run db:seed
+```
 
 ## Environment Variables
 
-The app currently uses two environment variables. The tracked example file is [`.env.example`](./.env.example).
+The app currently uses three environment variables. The tracked example file is [`.env.example`](./.env.example).
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `DATABASE_URL` | Yes for live clinic data | Connects Drizzle and Neon to the `clinics` table |
+| `GOOGLE_PLACES_API_KEY` | Yes for live clinic search | Used by server-side Google Places Text Search requests |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Yes for live map pins | Loads the Google Maps JavaScript API in the browser |
+| `DATABASE_URL` | Optional | Used only by the historical Neon/Drizzle scripts in this repo |
 
 Notes:
 
-- If `DATABASE_URL` is missing or Neon is temporarily unavailable, the app falls back to sample Toronto clinic data so the homepage and category pages keep working.
+- If `GOOGLE_PLACES_API_KEY` is missing or the Places request fails, the app falls back to sample Toronto clinic data so the homepage and category pages keep working.
 - If `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is missing, the clinic list still works and the map area shows a friendly placeholder instead of crashing.
+- `DATABASE_URL` is not required for the current live browsing flow.
 - `.env.local` is intentionally ignored by git and should hold your real local secrets.
+
+## Google Places Setup
+
+1. Create or open a Google Cloud project.
+2. Enable the `Places API (New)`.
+3. Create a server-side API key.
+4. Add the key to `.env.local` as:
+
+```env
+GOOGLE_PLACES_API_KEY=your_google_places_api_key
+```
+
+5. Restart the dev server after updating environment variables.
+
+Recommended:
+
+- Restrict the API key to server-side use before production.
+- Keep the Places key separate from your browser maps key when possible.
 
 ## Google Maps Setup
 
@@ -101,9 +116,11 @@ Recommended:
 - Restrict the API key to the correct websites before production use.
 - Add billing in Google Cloud if your project requires it for Maps usage.
 
-## Neon + Drizzle Setup
+## Optional Neon + Drizzle Scripts
 
-1. Create a Neon Postgres database.
+This repo still includes the earlier Neon + Drizzle tooling, but the live clinic browsing flow no longer depends on it at runtime.
+
+1. Create a Neon Postgres database if you want to use the scripts.
 2. Copy the Neon connection string into `.env.local`:
 
 ```env
@@ -120,6 +137,12 @@ npm run db:push
 
 ```bash
 npm run db:seed
+```
+
+5. Import Google Places clinics into Neon:
+
+```bash
+npm run db:import:places
 ```
 
 Drizzle files in this repo:
@@ -166,9 +189,10 @@ Current routes:
 
 ## Current Behavior Notes
 
-- The homepage top-clinics content revalidates every 60 seconds.
+- Homepage featured clinics and category results now fetch live Google Places data at request time.
 - The homepage search is category search for now, not full clinic-name search.
-- Clinic data is stored in Neon, but the UI can safely fall back to sample data for demos or temporary outages.
+- Google Places results are enriched with app-layer area and mock availability metadata so the current UI stays intact.
+- The UI safely falls back to sample Toronto clinic data for demos or temporary API outages.
 
 ## What Is Intentionally Not Built Yet
 
@@ -195,4 +219,5 @@ npm run lint
 npm run db:generate
 npm run db:push
 npm run db:seed
+npm run db:import:places
 ```
