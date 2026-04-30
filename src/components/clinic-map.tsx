@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import {
-  GoogleMap,
-  InfoWindowF,
-  MarkerF,
-  useJsApiLoader,
-} from "@react-google-maps/api";
+  APIProvider,
+  AdvancedMarker,
+  InfoWindow,
+  Map,
+  Pin,
+  useMap,
+} from "@vis.gl/react-google-maps";
 import { Loader2, MapPinned, TriangleAlert } from "lucide-react";
 import type { ClinicListItem } from "@/db";
 import type { UserLocation } from "@/lib/clinic-search";
@@ -21,14 +23,11 @@ type ClinicMapProps = {
   userLocation?: UserLocation | null;
 };
 
-type LoadedClinicMapProps = ClinicMapProps & {
-  apiKey: string;
-};
-
 const mapContainerStyle = {
   width: "100%",
   height: "100%",
 };
+
 const mapStyles: google.maps.MapTypeStyle[] = [
   {
     featureType: "poi",
@@ -59,6 +58,7 @@ const mapStyles: google.maps.MapTypeStyle[] = [
     stylers: [{ color: "#dbeafe" }],
   },
 ];
+
 const defaultTorontoCenter = {
   lat: 43.6532,
   lng: -79.3832,
@@ -66,6 +66,7 @@ const defaultTorontoCenter = {
 
 export function ClinicMap(props: ClinicMapProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const [apiStatus, setApiStatus] = useState<"loading" | "loaded" | "error">("loading");
 
   if (!apiKey) {
     return (
@@ -84,27 +85,148 @@ export function ClinicMap(props: ClinicMapProps) {
     );
   }
 
-  return <LoadedClinicMap {...props} apiKey={apiKey} />;
+  return (
+    <APIProvider
+      apiKey={apiKey}
+      libraries={["marker"]}
+      disableUsageAttribution
+      solutionChannel=""
+      onLoad={() => {
+        setApiStatus("loaded");
+      }}
+      onError={() => {
+        setApiStatus("error");
+      }}
+    >
+      {apiStatus === "error" ? (
+        <MapLoadError />
+      ) : apiStatus !== "loaded" ? (
+        <MapLoadingState categoryLabel={props.categoryLabel} />
+      ) : (
+        <LoadedClinicMap {...props} />
+      )}
+    </APIProvider>
+  );
 }
 
 function LoadedClinicMap({
   clinics,
   activeClinicId,
   onSelectClinic,
-  apiKey,
-  categoryLabel,
   preferredCenter = null,
   preferredCenterLabel = null,
   userLocation = null,
-}: LoadedClinicMapProps) {
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: "voxhoo-clinic-google-map",
-    googleMapsApiKey: apiKey,
-  });
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+}: ClinicMapProps) {
+  const selectedClinic = clinics.find((clinic) => clinic.id === activeClinicId) ?? null;
 
-  const selectedClinic =
-    clinics.find((clinic) => clinic.id === activeClinicId) ?? null;
+  return (
+    <Map
+      id="clinic-results-map"
+      mapId="DEMO_MAP_ID"
+      defaultCenter={preferredCenter ?? defaultTorontoCenter}
+      defaultZoom={11}
+      style={mapContainerStyle}
+      disableDefaultUI
+      zoomControl
+      clickableIcons={false}
+      fullscreenControl={false}
+      streetViewControl={false}
+      mapTypeControl={false}
+      styles={mapStyles}
+      onClick={() => {
+        onSelectClinic(null);
+      }}
+    >
+      <MapViewportController
+        clinics={clinics}
+        selectedClinic={selectedClinic}
+        preferredCenter={preferredCenter}
+        userLocation={userLocation}
+      />
+
+      {clinics.map((clinic) => {
+        const isActive = clinic.id === activeClinicId;
+
+        return (
+          <AdvancedMarker
+            key={clinic.id}
+            position={{ lat: clinic.lat, lng: clinic.lng }}
+            title={clinic.name}
+            zIndex={isActive ? 10 : 1}
+            onClick={() => {
+              onSelectClinic(clinic.id);
+            }}
+          >
+            <Pin
+              background={isActive ? "#222222" : "#ff385c"}
+              borderColor="#ffffff"
+              glyphColor="#ffffff"
+              scale={isActive ? 1.15 : 1}
+            />
+          </AdvancedMarker>
+        );
+      })}
+
+      {userLocation ? (
+        <AdvancedMarker
+          position={userLocation}
+          title="Your location"
+          zIndex={20}
+        >
+          <div className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[rgba(37,99,235,0.16)]">
+            <div className="h-4 w-4 rounded-full border-[3px] border-white bg-[#2563eb]" />
+          </div>
+        </AdvancedMarker>
+      ) : null}
+
+      {!userLocation && preferredCenter ? (
+        <AdvancedMarker
+          position={preferredCenter}
+          title={preferredCenterLabel ? `${preferredCenterLabel} area` : "Selected area"}
+          zIndex={5}
+        >
+          <div className="flex h-[22px] w-[22px] items-center justify-center rounded-full border-2 border-[#ff385c] bg-[rgba(255,56,92,0.12)]">
+            <div className="h-[7px] w-[7px] rounded-full bg-[#ff385c]" />
+          </div>
+        </AdvancedMarker>
+      ) : null}
+
+      {selectedClinic ? (
+        <InfoWindow
+          position={{ lat: selectedClinic.lat, lng: selectedClinic.lng }}
+          onClose={() => {
+            onSelectClinic(null);
+          }}
+        >
+          <div className="max-w-[220px] space-y-1 pr-3">
+            <p className="text-sm font-semibold text-slate-900">
+              {selectedClinic.name}
+            </p>
+            <p className="text-xs leading-5 text-slate-600">
+              {selectedClinic.address}
+            </p>
+            <p className="text-xs font-medium text-slate-700">
+              {selectedClinic.phone || "Phone unavailable"}
+            </p>
+          </div>
+        </InfoWindow>
+      ) : null}
+    </Map>
+  );
+}
+
+function MapViewportController({
+  clinics,
+  selectedClinic,
+  preferredCenter,
+  userLocation,
+}: {
+  clinics: ClinicListItem[];
+  selectedClinic: ClinicListItem | null;
+  preferredCenter: UserLocation | null;
+  userLocation: UserLocation | null;
+}) {
+  const map = useMap("clinic-results-map");
 
   useEffect(() => {
     if (!map || selectedClinic) {
@@ -159,177 +281,33 @@ function LoadedClinicMap({
     map.setZoom(Math.max(currentZoom, 14));
   }, [map, selectedClinic]);
 
-  if (loadError) {
-    return (
-      <div className="flex h-full min-h-[360px] flex-col items-center justify-center rounded-[24px] border border-dashed border-border/80 bg-white px-6 py-10 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-[#fce7dc] text-[#af5239]">
-          <TriangleAlert className="h-6 w-6" />
-        </div>
-        <h3 className="mt-5 font-heading text-2xl text-foreground">
-          We couldn&apos;t load the map
-        </h3>
-        <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
-          The clinic list is still available, but the Google Maps script failed to
-          load for this session.
-        </p>
-      </div>
-    );
-  }
+  return null;
+}
 
-  if (!isLoaded) {
-    return (
-      <div className="flex h-full min-h-[360px] flex-col items-center justify-center rounded-[24px] bg-white px-6 py-10 text-center">
-        <Loader2 className="h-7 w-7 animate-spin text-primary" />
-        <p className="mt-4 text-sm font-medium text-muted-foreground">
-          Loading {categoryLabel.toLowerCase()} clinic pins...
-        </p>
-      </div>
-    );
-  }
-
+function MapLoadingState({ categoryLabel }: Pick<ClinicMapProps, "categoryLabel">) {
   return (
-    <GoogleMap
-      mapContainerStyle={mapContainerStyle}
-      onLoad={(instance) => {
-        instance.setCenter(preferredCenter ?? defaultTorontoCenter);
-        instance.setZoom(11);
-        setMap(instance);
-      }}
-      onUnmount={() => {
-        setMap(null);
-      }}
-      onClick={() => {
-        onSelectClinic(null);
-      }}
-      options={{
-        disableDefaultUI: true,
-        zoomControl: true,
-        clickableIcons: false,
-        fullscreenControl: false,
-        streetViewControl: false,
-        mapTypeControl: false,
-        styles: mapStyles,
-      }}
-    >
-      {clinics.map((clinic) => {
-        const isActive = clinic.id === activeClinicId;
-
-        return (
-          <MarkerF
-            key={clinic.id}
-            position={{ lat: clinic.lat, lng: clinic.lng }}
-            title={clinic.name}
-            icon={createMarkerIcon(isActive)}
-            zIndex={isActive ? 10 : 1}
-            onClick={() => {
-              onSelectClinic(clinic.id);
-            }}
-          />
-        );
-      })}
-
-      {userLocation ? (
-        <MarkerF
-          position={userLocation}
-          title="Your location"
-          icon={createUserMarkerIcon()}
-          zIndex={20}
-        />
-      ) : null}
-
-      {!userLocation && preferredCenter ? (
-        <MarkerF
-          position={preferredCenter}
-          title={preferredCenterLabel ? `${preferredCenterLabel} area` : "Selected area"}
-          icon={createAreaMarkerIcon()}
-          zIndex={5}
-        />
-      ) : null}
-
-      {selectedClinic ? (
-        <InfoWindowF
-          position={{ lat: selectedClinic.lat, lng: selectedClinic.lng }}
-          onCloseClick={() => {
-            onSelectClinic(null);
-          }}
-        >
-          <div className="max-w-[220px] space-y-1 pr-3">
-            <p className="text-sm font-semibold text-slate-900">
-              {selectedClinic.name}
-            </p>
-            <p className="text-xs leading-5 text-slate-600">
-              {selectedClinic.address}
-            </p>
-            <p className="text-xs font-medium text-slate-700">
-              {selectedClinic.phone || "Phone unavailable"}
-            </p>
-          </div>
-        </InfoWindowF>
-      ) : null}
-    </GoogleMap>
+    <div className="flex h-full min-h-[360px] flex-col items-center justify-center rounded-[24px] bg-white px-6 py-10 text-center">
+      <Loader2 className="h-7 w-7 animate-spin text-primary" />
+      <p className="mt-4 text-sm font-medium text-muted-foreground">
+        Loading {categoryLabel.toLowerCase()} clinic pins...
+      </p>
+    </div>
   );
 }
 
-function createMarkerIcon(isActive: boolean) {
-  if (typeof window === "undefined" || !window.google?.maps) {
-    return undefined;
-  }
-
-  const fill = isActive ? "#222222" : "#ff385c";
-  const size = isActive ? 38 : 34;
-  const height = isActive ? 46 : 42;
-
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${height}" viewBox="0 0 38 46" fill="none">
-      <path d="M19 44C19 44 34 31.9 34 19.6C34 11.5 27.1 5 19 5C10.9 5 4 11.5 4 19.6C4 31.9 19 44 19 44Z" fill="${fill}" stroke="white" stroke-width="2"/>
-      <circle cx="19" cy="20" r="6.5" fill="white"/>
-    </svg>
-  `;
-
-  return {
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
-    scaledSize: new window.google.maps.Size(size, height),
-    anchor: new window.google.maps.Point(size / 2, height),
-  };
-}
-
-function createAreaMarkerIcon() {
-  if (typeof window === "undefined" || !window.google?.maps) {
-    return undefined;
-  }
-
-  const size = 22;
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 22 22" fill="none">
-      <circle cx="11" cy="11" r="9" fill="rgba(255,56,92,0.12)" stroke="#ff385c" stroke-width="2" />
-      <circle cx="11" cy="11" r="3.5" fill="#ff385c" />
-    </svg>
-  `;
-
-  return {
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
-    scaledSize: new window.google.maps.Size(size, size),
-    anchor: new window.google.maps.Point(size / 2, size / 2),
-  };
-}
-
-function createUserMarkerIcon() {
-  if (typeof window === "undefined" || !window.google?.maps) {
-    return undefined;
-  }
-
-  const glowSize = 34;
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${glowSize}" height="${glowSize}" viewBox="0 0 34 34" fill="none">
-      <circle cx="17" cy="17" r="16" fill="rgba(37,99,235,0.16)" />
-      <circle cx="17" cy="17" r="8" fill="#2563eb" stroke="white" stroke-width="3" />
-    </svg>
-  `;
-
-  return {
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
-    scaledSize: new window.google.maps.Size(glowSize, glowSize),
-    anchor: new window.google.maps.Point(glowSize / 2, glowSize / 2),
-    labelOrigin: new window.google.maps.Point(glowSize / 2, glowSize / 2),
-  };
+function MapLoadError() {
+  return (
+    <div className="flex h-full min-h-[360px] flex-col items-center justify-center rounded-[24px] border border-dashed border-border/80 bg-white px-6 py-10 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-[#fce7dc] text-[#af5239]">
+        <TriangleAlert className="h-6 w-6" />
+      </div>
+      <h3 className="mt-5 font-heading text-2xl text-foreground">
+        We couldn&apos;t load the map
+      </h3>
+      <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
+        The clinic list is still available, but the Google Maps script failed to
+        load for this session.
+      </p>
+    </div>
+  );
 }
