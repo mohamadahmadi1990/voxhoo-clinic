@@ -10,7 +10,7 @@ import { clinicCategories } from "@/lib/clinic-categories";
 import { getCategoryTheme } from "@/lib/category-theme";
 import { cn } from "@/lib/utils";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 const valueProps = [
   {
@@ -25,7 +25,7 @@ const valueProps = [
   },
   {
     title: "Credible clinic data",
-    description: "Live clinic data can fall back to trusted Toronto samples if the database is unavailable.",
+    description: "Live Google Places clinic data can fall back to trusted Toronto samples if the API is unavailable.",
     icon: ShieldCheck,
   },
   {
@@ -39,8 +39,8 @@ export default async function Home() {
   const topClinicsResult = await getTopClinicsSafe(8);
   const topClinics = topClinicsResult.clinics;
   const topClinicsBadgeLabel =
-    topClinicsResult.source === "database"
-      ? "Toronto clinics from Neon"
+    topClinicsResult.source === "places"
+      ? "Live clinics from Google Places"
       : "Showing Toronto sample clinics";
 
   return (

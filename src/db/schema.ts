@@ -5,6 +5,8 @@ export const clinicCategoryEnum = pgEnum("clinic_category", clinicCategorySlugs)
 
 export const clinics = pgTable("clinics", {
   id: serial("id").primaryKey(),
+  googlePlaceId: text("google_place_id"),
+  source: text("source"),
   name: text("name").notNull(),
   category: clinicCategoryEnum("category").notNull(),
   address: text("address").notNull(),

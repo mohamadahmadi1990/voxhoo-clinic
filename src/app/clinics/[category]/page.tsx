@@ -6,9 +6,10 @@ import { CategorySearch } from "@/components/category-search";
 import { CategoryRail } from "@/components/category-rail";
 import { ClinicResultsView } from "@/components/clinic-results-view";
 import { DataNotice } from "@/components/data-notice";
+import { ResultsSortSelect } from "@/components/results-sort-select";
 import { SiteHeader } from "@/components/site-header";
 import { buttonVariants } from "@/components/ui/button";
-import { getClinicsByCategorySafe } from "@/db";
+import { getStoredClinicsByCategory } from "@/db";
 import { clinicCategories, getCategoryBySlug } from "@/lib/clinic-categories";
 import { refineClinicsForResults } from "@/lib/clinic-results";
 import {
@@ -16,6 +17,7 @@ import {
   formatSearchDateLabel,
   normalizeLocationParam,
   normalizeSearchDateParam,
+  normalizeSortParam,
   normalizeUserLocationParams,
 } from "@/lib/clinic-search";
 import { cn } from "@/lib/utils";
@@ -29,6 +31,7 @@ type ClinicsByCategoryPageProps = {
     location?: string | string[];
     lat?: string | string[];
     lng?: string | string[];
+    sort?: string | string[];
   }>;
 };
 
@@ -55,22 +58,24 @@ export default async function ClinicsByCategoryPage({
   searchParams,
 }: ClinicsByCategoryPageProps) {
   const { category } = await params;
-  const { date, location, lat, lng } = await searchParams;
+  const { date, location, lat, lng, sort } = await searchParams;
   const currentCategory = getCategoryBySlug(category);
 
   if (!currentCategory) {
     notFound();
   }
 
-  const clinicsResult = await getClinicsByCategorySafe(currentCategory.slug);
   const selectedDate = normalizeSearchDateParam(date);
   const selectedLocation = normalizeLocationParam(location);
   const userLocation = normalizeUserLocationParams({ lat, lng });
+  const selectedSort = normalizeSortParam(sort);
+  const storedClinics = await getStoredClinicsByCategory(currentCategory.slug);
   const { clinics, isLocationFallback } = refineClinicsForResults({
-    clinics: clinicsResult.clinics,
+    clinics: storedClinics,
     selectedDate,
     selectedLocation,
     userLocation,
+    sort: selectedSort,
   });
 
   const selectedDateLabel = selectedDate
@@ -81,6 +86,7 @@ export default async function ClinicsByCategoryPage({
     date: selectedDate,
     location: selectedLocation?.slug ?? null,
     userLocation,
+    sort: selectedSort,
   });
   const locationFallbackNotice =
     isLocationFallback && selectedLocation
@@ -174,9 +180,9 @@ export default async function ClinicsByCategoryPage({
                 ) : null}
               </div>
             </div>
+            <ResultsSortSelect value={selectedSort} />
           </div>
 
-          {clinicsResult.warning ? <DataNotice message={clinicsResult.warning} /> : null}
           {locationFallbackNotice ? <DataNotice message={locationFallbackNotice} /> : null}
 
           <ClinicResultsView

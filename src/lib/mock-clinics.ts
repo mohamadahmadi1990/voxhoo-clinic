@@ -1,6 +1,7 @@
 import { addDays, format } from "date-fns";
 import type { ClinicCategorySlug } from "./clinic-categories";
-import type { ClinicAreaLabel } from "./clinic-search";
+import type { ClinicListItem } from "./clinic-list-item";
+import { getNearestClinicArea, type ClinicAreaLabel } from "./clinic-search";
 
 type BaseMockClinicSeed = {
   name: string;
@@ -17,9 +18,7 @@ export type MockClinicSeed = BaseMockClinicSeed & {
   availableDates: string[];
 };
 
-export type MockClinic = MockClinicSeed & {
-  id: number;
-};
+export type MockClinic = ClinicListItem;
 
 const baseMockClinicSeeds: BaseMockClinicSeed[] = [
   {
@@ -241,7 +240,7 @@ const availabilityDatePool = Array.from({ length: 7 }, (_, index) =>
 
 export const mockClinicSeeds: MockClinicSeed[] = baseMockClinicSeeds.map((clinic) => ({
   ...clinic,
-  availableDates: generateAvailableDates(clinic),
+  availableDates: generateAvailableDatesForKey(clinic.category, clinic.name),
 }));
 
 export const mockClinics: MockClinic[] = mockClinicSeeds.map((clinic, index) => ({
@@ -270,31 +269,52 @@ export function getTopMockClinics(limit = 8) {
 export function attachClinicMetadata<T extends {
   category: ClinicCategorySlug;
   name: string;
+  lat: number;
+  lng: number;
 }>(clinic: T): T & { availableDates: string[]; area: ClinicAreaLabel } {
   return {
     ...clinic,
-    availableDates: getClinicAvailability(clinic.category, clinic.name),
-    area: getClinicArea(clinic.category, clinic.name),
+    availableDates: getClinicAvailability(clinic),
+    area: getClinicArea(clinic),
   };
 }
 
 export function attachClinicMetadataList<T extends {
   category: ClinicCategorySlug;
   name: string;
+  lat: number;
+  lng: number;
 }>(clinics: T[]) {
   return clinics.map((clinic) => attachClinicMetadata(clinic));
 }
 
-function getClinicAvailability(category: ClinicCategorySlug, name: string) {
-  return availabilityLookup.get(buildClinicMetadataKey(category, name)) ?? [];
+function getClinicAvailability(clinic: {
+  category: ClinicCategorySlug;
+  name: string;
+}) {
+  return (
+    availabilityLookup.get(buildClinicMetadataKey(clinic.category, clinic.name)) ??
+    generateAvailableDatesForKey(clinic.category, clinic.name)
+  );
 }
 
-function getClinicArea(category: ClinicCategorySlug, name: string) {
-  return areaLookup.get(buildClinicMetadataKey(category, name)) ?? "Toronto";
+function getClinicArea(clinic: {
+  category: ClinicCategorySlug;
+  name: string;
+  lat: number;
+  lng: number;
+}) {
+  return (
+    areaLookup.get(buildClinicMetadataKey(clinic.category, clinic.name)) ??
+    getNearestClinicArea({
+      lat: clinic.lat,
+      lng: clinic.lng,
+    }).label
+  );
 }
 
-function generateAvailableDates(clinic: BaseMockClinicSeed) {
-  const random = createSeededRandom(buildClinicMetadataKey(clinic.category, clinic.name));
+function generateAvailableDatesForKey(category: ClinicCategorySlug, name: string) {
+  const random = createSeededRandom(buildClinicMetadataKey(category, name));
   const shuffledDates = [...availabilityDatePool];
 
   for (let index = shuffledDates.length - 1; index > 0; index -= 1) {

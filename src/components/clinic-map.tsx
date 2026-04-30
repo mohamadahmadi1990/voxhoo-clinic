@@ -98,7 +98,7 @@ function LoadedClinicMap({
   userLocation = null,
 }: LoadedClinicMapProps) {
   const { isLoaded, loadError } = useJsApiLoader({
-    id: "care-atlas-google-map",
+    id: "voxhoo-clinic-google-map",
     googleMapsApiKey: apiKey,
   });
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -261,7 +261,7 @@ function LoadedClinicMap({
               {selectedClinic.address}
             </p>
             <p className="text-xs font-medium text-slate-700">
-              {selectedClinic.phone}
+              {selectedClinic.phone || "Phone unavailable"}
             </p>
           </div>
         </InfoWindowF>

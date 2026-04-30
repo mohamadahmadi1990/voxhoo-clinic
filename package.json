@@ -10,7 +10,8 @@
     "test": "tsc -p tsconfig.test.json && node .test-dist/tests/run-tests.js",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:seed": "tsx src/db/seed.ts",
+    "db:import:places": "tsx src/db/import-google-places.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

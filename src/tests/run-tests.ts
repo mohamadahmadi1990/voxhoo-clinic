@@ -1,4 +1,5 @@
 import { runDatabaseFallbackTests } from "../db/index.test";
+import { runGooglePlacesTests } from "../lib/google-places.test";
 import { runClinicResultsTests } from "../lib/clinic-results.test";
 
 async function main() {
@@ -8,7 +9,11 @@ async function main() {
       run: runClinicResultsTests,
     },
     {
-      name: "database fallback",
+      name: "google places helpers",
+      run: runGooglePlacesTests,
+    },
+    {
+      name: "places fallback",
       run: runDatabaseFallbackTests,
     },
   ];

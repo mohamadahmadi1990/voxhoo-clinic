@@ -120,7 +120,9 @@ export function ClinicDetailDrawer({
   }
 
   const theme = getCategoryTheme(categorySlug);
-  const dialHref = `tel:${clinic.phone.replace(/[^\d+]/g, "")}`;
+  const phoneDigits = clinic.phone.replace(/[^\d+]/g, "");
+  const canCallClinic = Boolean(phoneDigits);
+  const dialHref = canCallClinic ? `tel:${phoneDigits}` : null;
 
   return createPortal(
     <div ref={containerRef} className="fixed inset-0 z-50">
@@ -248,13 +250,20 @@ export function ClinicDetailDrawer({
 
           <div className="border-t border-border bg-white px-5 py-4 sm:px-6 sm:py-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-              <a
-                href={dialHref}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border bg-white px-5 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-secondary"
-              >
-                <Phone className="h-4 w-4" />
-                Call clinic
-              </a>
+              {dialHref ? (
+                <a
+                  href={dialHref}
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border bg-white px-5 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-secondary"
+                >
+                  <Phone className="h-4 w-4" />
+                  Call clinic
+                </a>
+              ) : (
+                <div className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border bg-secondary px-5 text-sm font-semibold text-muted-foreground">
+                  <Phone className="h-4 w-4" />
+                  Phone unavailable
+                </div>
+              )}
               <Button
                 type="button"
                 variant="default"
