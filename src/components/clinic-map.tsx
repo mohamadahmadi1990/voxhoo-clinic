@@ -28,37 +28,6 @@ const mapContainerStyle = {
   height: "100%",
 };
 
-const mapStyles: google.maps.MapTypeStyle[] = [
-  {
-    featureType: "poi",
-    stylers: [{ visibility: "off" }],
-  },
-  {
-    featureType: "transit",
-    stylers: [{ visibility: "off" }],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [{ color: "#ffffff" }],
-  },
-  {
-    featureType: "road",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#6b7280" }],
-  },
-  {
-    featureType: "administrative.neighborhood",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#717171" }],
-  },
-  {
-    featureType: "water",
-    elementType: "geometry",
-    stylers: [{ color: "#dbeafe" }],
-  },
-];
-
 const defaultTorontoCenter = {
   lat: 43.6532,
   lng: -79.3832,
@@ -132,7 +101,6 @@ function LoadedClinicMap({
       fullscreenControl={false}
       streetViewControl={false}
       mapTypeControl={false}
-      styles={mapStyles}
       onClick={() => {
         onSelectClinic(null);
       }}
