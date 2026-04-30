@@ -26,6 +26,7 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - [Phase 15: Business Plan Readiness Baseline](./phases/2026-04-29-phase-15-business-plan-readiness-baseline.md)
 - [Phase 16: Voxhoo Clinic Rename and GitHub Fork Preparation](./phases/2026-04-29-phase-16-voxhoo-clinic-rename-and-github-fork-preparation.md)
 - [Phase 17: Voxhoo Clinic GitHub Repository Launch](./phases/2026-04-29-phase-17-voxhoo-clinic-github-repository-launch.md)
+- [Phase 18: Canonical Repository Switch and Historical Repo Note](./phases/2026-04-29-phase-18-canonical-repository-switch-and-historical-repo-note.md)
 
 ## Current Status
 
@@ -49,6 +50,8 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - A clean continuation branch and validation baseline are now recorded for ongoing Codex work.
 - The project branding now uses Voxhoo Clinic across the app and current docs.
 - A new public GitHub home now exists at `mohamadahmadi1990/voxhoo-clinic`.
+- The workspace `origin` remote now points to `mohamadahmadi1990/voxhoo-clinic`.
+- The previous repository is now a historical reference only.
 
 ## MVP Scope Still Intentionally Excluded
 

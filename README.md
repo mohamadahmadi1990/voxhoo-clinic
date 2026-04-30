@@ -28,6 +28,11 @@ Current stack:
 
 Project progress reports live in [docs/project-phase-report.md](./docs/project-phase-report.md).
 
+## Repository Status
+
+- Active repository: `mohamadahmadi1990/voxhoo-clinic`
+- Active branch baseline: `codex/business-plan-baseline`
+
 ## Setup Instructions
 
 1. Install dependencies:
@@ -36,7 +41,7 @@ Project progress reports live in [docs/project-phase-report.md](./docs/project-p
 npm install
 ```
 
-2. Copy the example environment file values into `.env.local`:
+2. Copy `.env.example` to `.env.local`, then replace the placeholder values:
 
 ```env
 DATABASE_URL=postgresql://username:password@host.neon.tech/dbname?sslmode=require
@@ -65,7 +70,7 @@ npm run dev
 
 ## Environment Variables
 
-The app currently uses two environment variables.
+The app currently uses two environment variables. The tracked example file is [`.env.example`](./.env.example).
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
@@ -76,6 +81,7 @@ Notes:
 
 - If `DATABASE_URL` is missing or Neon is temporarily unavailable, the app falls back to sample Toronto clinic data so the homepage and category pages keep working.
 - If `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is missing, the clinic list still works and the map area shows a friendly placeholder instead of crashing.
+- `.env.local` is intentionally ignored by git and should hold your real local secrets.
 
 ## Google Maps Setup
 

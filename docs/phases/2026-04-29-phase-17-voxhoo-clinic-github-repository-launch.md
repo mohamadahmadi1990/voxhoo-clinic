@@ -20,9 +20,9 @@ Create the new GitHub home for Voxhoo Clinic and push the renamed project baseli
 
 ## Technical Notes
 
-- GitHub did not produce a separate same-owner fork from `mohamadahmadi1990/clinic-app`, so the requested destination was created as a new public repository under the target name instead.
+- GitHub did not produce a separate same-owner fork path, so the requested destination was created as a new public repository under the target name instead.
 - The repository launch preserves the renamed Voxhoo Clinic project state as the new canonical GitHub destination.
-- The original `clinic-app` repository can still be kept as the historical source reference if needed.
+- Historical-repository handling is documented separately in the final canonical-repo note.
 
 ## Validation
 
@@ -31,4 +31,4 @@ Create the new GitHub home for Voxhoo Clinic and push the renamed project baseli
 ## Product Impact
 
 - Voxhoo Clinic now has its own dedicated GitHub repository under the requested name.
-- Future work can continue against the new repository identity instead of the old `clinic-app` name.
+- Future work can continue against the new repository identity without relying on the previous repo name.

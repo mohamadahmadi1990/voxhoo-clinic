@@ -5,7 +5,7 @@ Status: Completed
 
 ## Objective
 
-Rename the project from Care Atlas to Voxhoo Clinic across the active app and docs, then prepare the repository state for a new GitHub home named `voxhoo-clinic`.
+Complete the branding rename to Voxhoo Clinic across the active app and docs, then prepare the repository state for the new GitHub home named `voxhoo-clinic`.
 
 ## Delivered
 
