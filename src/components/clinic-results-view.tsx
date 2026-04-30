@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { Compass, MapPin, Phone, Star } from "lucide-react";
 import { CategoryIcon } from "@/components/category-icon";
 import { ClinicDetailDrawer } from "@/components/clinic-detail-drawer";
@@ -62,6 +63,9 @@ export function ClinicResultsView({
 
   function focusClinic(clinicId: number | null, scrollToMap = false) {
     setActiveClinicId(clinicId);
+    setDetailClinicId((currentDetailClinicId) =>
+      currentDetailClinicId === clinicId ? currentDetailClinicId : null,
+    );
 
     if (scrollToMap && clinicId && window.innerWidth < 1024) {
       mapSectionRef.current?.scrollIntoView({
@@ -69,6 +73,15 @@ export function ClinicResultsView({
         block: "start",
       });
     }
+  }
+
+  function selectClinicFromCard(clinicId: number) {
+    drawerTriggerRef.current = null;
+
+    flushSync(() => {
+      setActiveClinicId(clinicId);
+      setDetailClinicId(null);
+    });
   }
 
   function openClinicDetails(clinicId: number, triggerElement: HTMLElement | null) {
@@ -136,133 +149,118 @@ export function ClinicResultsView({
             </Card>
           ) : null}
 
-          {clinicsWithDistance.map(({ clinic, distanceKm }, index) => {
-            const isActive = clinic.id === activeClinicId;
-            const distanceLabel = distanceKm === null ? null : formatDistanceLabel(distanceKm);
+          <div className="grid gap-4 lg:grid-cols-2">
+            {clinicsWithDistance.map(({ clinic, distanceKm }) => {
+              const isActive = clinic.id === activeClinicId;
+              const distanceLabel = distanceKm === null ? null : formatDistanceLabel(distanceKm);
 
-            return (
-              <div
-                key={clinic.id}
-                ref={(node) => {
-                  cardRefs.current[clinic.id] = node;
-                }}
-              >
-                <Card
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => {
-                    focusClinic(clinic.id);
+              return (
+                <div
+                  key={clinic.id}
+                  ref={(node) => {
+                    cardRefs.current[clinic.id] = node;
                   }}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      focusClinic(clinic.id);
-                    }
-                  }}
-                  className={cn(
-                    "cursor-pointer overflow-hidden rounded-[24px] border border-border bg-white py-0 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(0,0,0,0.12)] sm:rounded-[28px]",
-                    isActive
-                      ? "border-primary/30 shadow-[0_18px_34px_rgba(255,56,92,0.16)] ring-2 ring-primary/16 ring-offset-2 ring-offset-transparent"
-                      : "",
-                  )}
                 >
-                  <div className="grid gap-0 md:grid-cols-[260px_minmax(0,1fr)]">
-                    <div className={cn("relative min-h-[180px] px-4 py-4 sm:min-h-[220px] sm:px-5 sm:py-5", theme.background)}>
+                  <Card
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => {
+                      selectClinicFromCard(clinic.id);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        selectClinicFromCard(clinic.id);
+                      }
+                    }}
+                  className={cn(
+                      "flex h-full cursor-pointer flex-col overflow-hidden rounded-[24px] border border-border bg-white py-0 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(0,0,0,0.12)] sm:rounded-[26px]",
+                      isActive
+                        ? "border-primary/30 shadow-[0_18px_34px_rgba(255,56,92,0.16)] ring-2 ring-primary/16 ring-offset-2 ring-offset-transparent"
+                        : "",
+                    )}
+                  >
+                    <div className={cn("relative min-h-[60px] border-b border-border/70 px-4 py-2 sm:px-5 sm:py-2.5", theme.background)}>
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.95),transparent_36%)]" />
-                      <div className="relative z-10 flex h-full flex-col justify-between">
-                        <div className="flex items-start justify-between gap-3">
-                          <Badge className="rounded-full bg-white px-3 py-1 text-[0.72rem] font-semibold text-foreground shadow-sm">
+                      <div className="relative z-10 flex h-full items-start justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <Badge className="rounded-full bg-white px-2.5 py-1 text-[0.68rem] font-semibold text-foreground shadow-sm">
                             {categoryLabel}
                           </Badge>
                           <div
                             className={cn(
-                              "flex h-11 w-11 items-center justify-center rounded-full shadow-sm",
+                              "flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl shadow-sm",
                               theme.iconBg,
                             )}
                           >
                             <CategoryIcon
                               category={categorySlug}
-                              className={cn("h-5 w-5", theme.iconColor)}
+                              className={cn("h-4.5 w-4.5", theme.iconColor)}
                             />
                           </div>
                         </div>
 
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-                            Voxhoo pick
-                          </p>
-                          <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                            {String(index + 1).padStart(2, "0")}
-                          </p>
+                        <div className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1.5 text-sm font-medium text-foreground shadow-sm">
+                          <Star className="h-3.5 w-3.5 fill-current text-foreground" />
+                          {clinic.rating.toFixed(1)}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-col">
-                      <CardHeader className="pt-4 sm:pt-5">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <CardTitle className="text-[1.15rem] font-semibold leading-7 sm:text-[1.32rem] sm:leading-8">
-                              {clinic.name}
-                            </CardTitle>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                              Clinic in {clinic.area}
-                            </p>
-                          </div>
-
-                          <div className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
-                            <Star className="h-4 w-4 fill-current text-foreground" />
-                            {clinic.rating.toFixed(1)}
-                          </div>
+                    <div className="flex h-full flex-1 flex-col">
+                      <CardHeader className="flex-1 space-y-0 px-4 pb-0 pt-2.5 sm:px-5 sm:pt-3">
+                        <CardTitle className="line-clamp-2 min-h-[2.5rem] text-[1rem] font-semibold leading-5.5 sm:text-[1.03rem]">
+                          {clinic.name}
+                        </CardTitle>
+                        <p className="mt-0.5 text-sm text-muted-foreground">
+                          {categoryLabel} clinic in {clinic.area}
+                        </p>
+                        <div className="mt-1.5 flex items-start gap-2.5 text-sm leading-5.5 text-muted-foreground">
+                          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                          <span className="line-clamp-2 min-h-[2.5rem]">{clinic.address}</span>
                         </div>
                       </CardHeader>
 
-                      <CardContent className="flex-1 space-y-4 pb-4 sm:pb-5">
-                        <div className="flex items-start gap-3 text-sm leading-6 text-muted-foreground">
-                          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          <span>{clinic.address}</span>
-                        </div>
-
-                        <div className="flex flex-wrap gap-3">
-                          <div className="rounded-full bg-secondary px-4 py-2 text-sm text-foreground">
-                            {isActive ? "Focused on the map" : "Select to focus on map"}
-                          </div>
+                      <CardContent className="px-4 pb-2.5 pt-2 sm:px-5 sm:pb-3">
+                        <div className="flex min-h-[40px] flex-wrap content-start gap-2">
                           {distanceLabel ? (
-                            <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm text-foreground">
+                            <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-sm text-foreground">
                               <Compass className="h-4 w-4 text-primary" />
                               {distanceLabel}
                             </div>
                           ) : null}
-                          <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm text-foreground">
+                          <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-sm text-foreground">
                             <Phone className="h-4 w-4 text-primary" />
                             {clinic.phone}
                           </div>
                         </div>
                       </CardContent>
 
-                      <CardFooter className="flex-col items-start gap-4 border-t border-border bg-white sm:flex-row sm:items-center sm:justify-between">
-                        <p className="max-w-md text-sm text-muted-foreground">
-                          Compare this clinic on the map with the rest of the category.
-                        </p>
-                        <Button
-                          type="button"
-                          variant={isActive ? "default" : "secondary"}
-                          size="lg"
-                          className="w-full rounded-full px-5 sm:w-auto"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            openClinicDetails(clinic.id, event.currentTarget);
-                          }}
-                        >
-                          View Clinic
-                        </Button>
+                      <CardFooter className="mt-auto border-t border-border bg-white px-4 py-2.5 sm:px-5 sm:py-3">
+                        <div className="flex w-full flex-wrap items-center gap-2">
+                          <p className="text-sm text-muted-foreground">
+                            {isActive ? "Selected on map" : "Click card to focus on map"}
+                          </p>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="ml-auto rounded-full px-3.5"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              openClinicDetails(clinic.id, event.currentTarget);
+                            }}
+                          >
+                            View Clinic
+                          </Button>
+                        </div>
                       </CardFooter>
                     </div>
-                  </div>
-                </Card>
-              </div>
-            );
-          })}
+                  </Card>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <div

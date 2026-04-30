@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   APIProvider,
   AdvancedMarker,
@@ -87,6 +87,48 @@ function LoadedClinicMap({
   userLocation = null,
 }: ClinicMapProps) {
   const selectedClinic = clinics.find((clinic) => clinic.id === activeClinicId) ?? null;
+  const activeClinicIdRef = useRef<number | null>(activeClinicId);
+  const infoWindowContentRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    activeClinicIdRef.current = activeClinicId;
+  }, [activeClinicId]);
+
+  useEffect(() => {
+    const element = infoWindowContentRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    const popupElements: HTMLElement[] = [];
+    let currentElement: HTMLElement | null = element;
+
+    for (let index = 0; index < 6 && currentElement; index += 1) {
+      popupElements.push(currentElement);
+      currentElement = currentElement.parentElement;
+    }
+
+    function stopPopupScroll(event: WheelEvent | TouchEvent) {
+      event.preventDefault();
+      event.stopPropagation();
+      if ("stopImmediatePropagation" in event) {
+        event.stopImmediatePropagation();
+      }
+    }
+
+    popupElements.forEach((popupElement) => {
+      popupElement.addEventListener("wheel", stopPopupScroll, { passive: false });
+      popupElement.addEventListener("touchmove", stopPopupScroll, { passive: false });
+    });
+
+    return () => {
+      popupElements.forEach((popupElement) => {
+        popupElement.removeEventListener("wheel", stopPopupScroll);
+        popupElement.removeEventListener("touchmove", stopPopupScroll);
+      });
+    };
+  }, [selectedClinic?.id]);
 
   return (
     <Map
@@ -101,6 +143,7 @@ function LoadedClinicMap({
       fullscreenControl={false}
       streetViewControl={false}
       mapTypeControl={false}
+      gestureHandling="greedy"
       onClick={() => {
         onSelectClinic(null);
       }}
@@ -163,10 +206,17 @@ function LoadedClinicMap({
         <InfoWindow
           position={{ lat: selectedClinic.lat, lng: selectedClinic.lng }}
           onClose={() => {
+            if (activeClinicIdRef.current !== selectedClinic.id) {
+              return;
+            }
+
             onSelectClinic(null);
           }}
         >
-          <div className="max-w-[220px] space-y-1 pr-3">
+          <div
+            ref={infoWindowContentRef}
+            className="max-w-[220px] space-y-1 pr-3"
+          >
             <p className="text-sm font-semibold text-slate-900">
               {selectedClinic.name}
             </p>
