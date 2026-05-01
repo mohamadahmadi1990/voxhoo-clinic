@@ -143,7 +143,7 @@ export function ClinicResultsView({
             <Card className="surface-panel rounded-[24px] border border-border py-0 sm:rounded-[28px]">
               <CardContent className="px-5 py-7 text-sm leading-7 text-muted-foreground sm:px-6 sm:py-8">
                 {selectedDateLabel
-                  ? `No ${categoryLabel.toLowerCase()} clinics show mock availability on ${selectedDateLabel}. Try another date or browse the category without a date filter.`
+                  ? `No ${categoryLabel.toLowerCase()} clinics are available on ${selectedDateLabel}. Try another date or browse the category without a date filter.`
                   : "No clinics are available in this category right now. Try another care type or check back after more clinics are added."}
               </CardContent>
             </Card>
@@ -234,6 +234,11 @@ export function ClinicResultsView({
                             {clinic.phone}
                           </div>
                         </div>
+                        {selectedDateLabel && clinic.availableTimeSlots?.length ? (
+                          <p className="mt-2 text-xs font-medium text-muted-foreground">
+                            {clinic.availableTimeSlots.join(" • ")}
+                          </p>
+                        ) : null}
                       </CardContent>
 
                       <CardFooter className="mt-auto border-t border-border bg-white px-4 py-2.5 sm:px-5 sm:py-3">
