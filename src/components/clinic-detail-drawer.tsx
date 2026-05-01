@@ -1,8 +1,9 @@
 "use client";
 
+import { format } from "date-fns";
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
-import { MapPin, Phone, Star, X } from "lucide-react";
+import { CalendarDays, MapPin, Phone, Star, X } from "lucide-react";
 import { CategoryIcon } from "@/components/category-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,9 @@ type ClinicDetailDrawerProps = {
   clinic: ClinicListItem | null;
   categoryLabel: string;
   categorySlug: ClinicCategorySlug;
+  selectedDateLabel?: string | null;
+  selectedTimeSlot?: string | null;
+  onSelectTimeSlot: (timeSlot: string | null) => void;
   onClose: () => void;
   onFocusOnMap: () => void;
 };
@@ -23,6 +27,9 @@ export function ClinicDetailDrawer({
   clinic,
   categoryLabel,
   categorySlug,
+  selectedDateLabel = null,
+  selectedTimeSlot = null,
+  onSelectTimeSlot,
   onClose,
   onFocusOnMap,
 }: ClinicDetailDrawerProps) {
@@ -123,6 +130,14 @@ export function ClinicDetailDrawer({
   const phoneDigits = clinic.phone.replace(/[^\d+]/g, "");
   const canCallClinic = Boolean(phoneDigits);
   const dialHref = canCallClinic ? `tel:${phoneDigits}` : null;
+  const availableTimeSlots = clinic.availableTimeSlots ?? [];
+  const timeSlots = clinic.timeSlots ?? [];
+  const availabilityDateLabel = selectedDateLabel
+    ? selectedDateLabel
+    : clinic.availabilityDate
+      ? formatAvailabilityDate(clinic.availabilityDate)
+      : null;
+  const hasAvailability = Boolean(availabilityDateLabel && timeSlots.length);
 
   return createPortal(
     <div ref={containerRef} className="fixed inset-0 z-50">
@@ -226,6 +241,71 @@ export function ClinicDetailDrawer({
               </section>
             </div>
 
+            {availabilityDateLabel ? (
+              <section className="mt-4 surface-panel rounded-[28px] border border-border px-5 py-5">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  <CalendarDays className="h-4 w-4 text-primary" />
+                  {selectedDateLabel ? "Selected date" : "Next available date"}
+                </div>
+                <p className="mt-3 text-sm font-semibold text-foreground">
+                  {availabilityDateLabel}
+                </p>
+
+                {hasAvailability ? (
+                  <>
+                    <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                      Time slots
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2.5">
+                      {timeSlots.map((timeSlot) => {
+                        const isAvailable = timeSlot.status === "available";
+                        const isSelected =
+                          isAvailable && selectedTimeSlot === timeSlot.startTime;
+
+                        return (
+                          <button
+                            key={`${timeSlot.startTime}-${timeSlot.endTime}`}
+                            type="button"
+                            disabled={!isAvailable}
+                            className={cn(
+                              "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                              isSelected
+                                ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                                : isAvailable
+                                  ? "border-border bg-white text-foreground hover:bg-secondary"
+                                  : "cursor-not-allowed border-border bg-secondary text-muted-foreground opacity-70",
+                            )}
+                            onClick={() => {
+                              if (!isAvailable) {
+                                return;
+                              }
+
+                              onSelectTimeSlot(timeSlot.startTime);
+                            }}
+                          >
+                            {timeSlot.startTime}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="lg"
+                      className="mt-5 h-12 rounded-full px-6"
+                      disabled={!availableTimeSlots.length}
+                    >
+                      Request appointment
+                    </Button>
+                  </>
+                ) : (
+                  <p className="mt-5 text-sm leading-7 text-muted-foreground">
+                    No available times are listed right now.
+                  </p>
+                )}
+              </section>
+            ) : null}
+
             <section className="mt-4 surface-panel rounded-[28px] border border-border px-5 py-5">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 Quick details
@@ -241,10 +321,6 @@ export function ClinicDetailDrawer({
                   Map pin available
                 </div>
               </div>
-              <p className="mt-5 max-w-lg text-sm leading-7 text-muted-foreground">
-                This lightweight clinic drawer keeps people inside the browse flow while
-                surfacing the most useful details before a deeper profile exists.
-              </p>
             </section>
           </div>
 
@@ -280,6 +356,10 @@ export function ClinicDetailDrawer({
     </div>,
     document.body,
   );
+}
+
+function formatAvailabilityDate(date: string) {
+  return format(new Date(`${date}T00:00:00`), "EEEE, MMM d");
 }
 
 function getFocusableElements(container: HTMLElement) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { Compass, MapPin, Phone, Star } from "lucide-react";
@@ -46,6 +47,7 @@ export function ClinicResultsView({
 }: ClinicResultsViewProps) {
   const [activeClinicId, setActiveClinicId] = useState<number | null>(null);
   const [detailClinicId, setDetailClinicId] = useState<number | null>(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
   const mapSectionRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const drawerTriggerRef = useRef<HTMLElement | null>(null);
@@ -88,6 +90,7 @@ export function ClinicResultsView({
     drawerTriggerRef.current = triggerElement;
     focusClinic(clinicId);
     setDetailClinicId(clinicId);
+    setSelectedTimeSlot(null);
   }
 
   function closeClinicDetails(returnFocusTo: HTMLElement | null = drawerTriggerRef.current) {
@@ -173,7 +176,7 @@ export function ClinicResultsView({
                         selectClinicFromCard(clinic.id);
                       }
                     }}
-                  className={cn(
+                    className={cn(
                       "flex h-full cursor-pointer flex-col overflow-hidden rounded-[24px] border border-border bg-white py-0 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(0,0,0,0.12)] sm:rounded-[26px]",
                       isActive
                         ? "border-primary/30 shadow-[0_18px_34px_rgba(255,56,92,0.16)] ring-2 ring-primary/16 ring-offset-2 ring-offset-transparent"
@@ -234,9 +237,12 @@ export function ClinicResultsView({
                             {clinic.phone}
                           </div>
                         </div>
-                        {selectedDateLabel && clinic.availableTimeSlots?.length ? (
+                        {clinic.availabilityDate && clinic.availableTimeSlots?.length ? (
                           <p className="mt-2 text-xs font-medium text-muted-foreground">
-                            {clinic.availableTimeSlots.join(" • ")}
+                            Earliest available:{" "}
+                            {selectedDateLabel
+                              ? clinic.availableTimeSlots[0]
+                              : `${formatAvailabilityDate(clinic.availabilityDate)} at ${clinic.availableTimeSlots[0]}`}
                           </p>
                         ) : null}
                       </CardContent>
@@ -256,7 +262,7 @@ export function ClinicResultsView({
                               openClinicDetails(clinic.id, event.currentTarget);
                             }}
                           >
-                            View Clinic
+                            Check availability
                           </Button>
                         </div>
                       </CardFooter>
@@ -301,6 +307,9 @@ export function ClinicResultsView({
         clinic={detailClinic}
         categoryLabel={categoryLabel}
         categorySlug={categorySlug}
+        selectedDateLabel={selectedDateLabel}
+        selectedTimeSlot={selectedTimeSlot}
+        onSelectTimeSlot={setSelectedTimeSlot}
         onClose={closeClinicDetails}
         onFocusOnMap={() => {
           if (detailClinicId) {
@@ -310,4 +319,8 @@ export function ClinicResultsView({
       />
     </>
   );
+}
+
+function formatAvailabilityDate(date: string) {
+  return format(new Date(`${date}T00:00:00`), "MMM d");
 }
