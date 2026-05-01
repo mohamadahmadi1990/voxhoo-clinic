@@ -120,57 +120,71 @@ export async function getClinicsByCategoryLocationAndDate(
       clinicId: clinicTimeSlots.clinicId,
       slotDate: clinicTimeSlots.slotDate,
       startTime: clinicTimeSlots.startTime,
+      endTime: clinicTimeSlots.endTime,
+      status: clinicTimeSlots.status,
     })
     .from(clinicTimeSlots)
-    .where(
-      and(
-        inArray(clinicTimeSlots.clinicId, clinicIds),
-        eq(clinicTimeSlots.status, "available"),
-      ),
-    );
+    .where(inArray(clinicTimeSlots.clinicId, clinicIds));
 
   const slotDatesByClinicId = new Map<number, string[]>();
-  const slotTimesByClinicId = new Map<number, string[]>();
-
   for (const slot of slotRows) {
+    if (slot.status !== "available") {
+      continue;
+    }
+
     const currentDates = slotDatesByClinicId.get(slot.clinicId) ?? [];
 
     if (!currentDates.includes(slot.slotDate)) {
       currentDates.push(slot.slotDate);
       slotDatesByClinicId.set(slot.clinicId, currentDates);
     }
-
-    if (options.date && slot.slotDate === options.date) {
-      const currentTimes = slotTimesByClinicId.get(slot.clinicId) ?? [];
-
-      if (!currentTimes.includes(slot.startTime)) {
-        currentTimes.push(slot.startTime);
-        slotTimesByClinicId.set(slot.clinicId, currentTimes);
-      }
-    }
   }
 
   return clinicRows
-    .map((clinic) => ({
-      id: clinic.id,
-      name: clinic.name,
-      category: clinic.category,
-      address: clinic.address,
-      lat: clinic.lat,
-      lng: clinic.lng,
-      rating: clinic.rating,
-      phone: clinic.phone,
-      area: normalizeStoredClinicArea(clinic.area, {
+    .map((clinic) => {
+      const availableDates = (slotDatesByClinicId.get(clinic.id) ?? []).sort((left, right) =>
+        left.localeCompare(right),
+      );
+      const availabilityDate = options.date ?? availableDates[0] ?? null;
+      const daySlots = availabilityDate
+        ? slotRows
+            .filter(
+              (slot) =>
+                slot.clinicId === clinic.id && slot.slotDate === availabilityDate,
+            )
+            .sort((left, right) => left.startTime.localeCompare(right.startTime))
+        : [];
+      const availableTimeSlots = availabilityDate
+        ? daySlots
+            .filter((slot) => slot.status === "available")
+            .map((slot) => slot.startTime)
+            .filter((slotTime, index, times) => times.indexOf(slotTime) === index)
+            .sort((left, right) => left.localeCompare(right))
+        : [];
+
+      return {
+        id: clinic.id,
+        name: clinic.name,
+        category: clinic.category,
+        address: clinic.address,
         lat: clinic.lat,
         lng: clinic.lng,
-      }),
-      availableDates: (slotDatesByClinicId.get(clinic.id) ?? []).sort((left, right) =>
-        left.localeCompare(right),
-      ),
-      availableTimeSlots: (slotTimesByClinicId.get(clinic.id) ?? [])
-        .sort((left, right) => left.localeCompare(right))
-        .slice(0, 3),
-    }))
+        rating: clinic.rating,
+        phone: clinic.phone,
+        area: normalizeStoredClinicArea(clinic.area, {
+          lat: clinic.lat,
+          lng: clinic.lng,
+        }),
+        availableDates,
+        availabilityDate,
+        availableTimeSlots,
+        timeSlots: daySlots.map((slot) => ({
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          status: slot.status,
+        })),
+      };
+    })
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 
