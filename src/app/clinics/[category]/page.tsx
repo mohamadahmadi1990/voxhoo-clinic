@@ -9,7 +9,7 @@ import { DataNotice } from "@/components/data-notice";
 import { ResultsSortSelect } from "@/components/results-sort-select";
 import { SiteHeader } from "@/components/site-header";
 import { buttonVariants } from "@/components/ui/button";
-import { getStoredClinicsByCategory } from "@/db";
+import { getClinicsByCategoryLocationAndDate } from "@/db";
 import { clinicCategories, getCategoryBySlug } from "@/lib/clinic-categories";
 import { refineClinicsForResults } from "@/lib/clinic-results";
 import {
@@ -69,7 +69,11 @@ export default async function ClinicsByCategoryPage({
   const selectedLocation = normalizeLocationParam(location);
   const userLocation = normalizeUserLocationParams({ lat, lng });
   const selectedSort = normalizeSortParam(sort);
-  const storedClinics = await getStoredClinicsByCategory(currentCategory.slug);
+  const storedClinics = await getClinicsByCategoryLocationAndDate(currentCategory.slug, {
+    selectedLocation,
+    userLocation,
+    date: selectedDate,
+  });
   const { clinics, isLocationFallback } = refineClinicsForResults({
     clinics: storedClinics,
     selectedDate,
@@ -147,11 +151,11 @@ export default async function ClinicsByCategoryPage({
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
                 {selectedLocationLabel && selectedDateLabel
-                  ? `Showing ${currentCategory.label.toLowerCase()} clinics for ${selectedLocationLabel} with mock availability on ${selectedDateLabel}.`
+                  ? `Showing ${currentCategory.label.toLowerCase()} clinics for ${selectedLocationLabel}. Available on selected date: ${selectedDateLabel}.`
                   : selectedLocationLabel
                     ? `Showing ${currentCategory.label.toLowerCase()} clinics for ${selectedLocationLabel}.`
                     : selectedDateLabel
-                      ? `Showing ${currentCategory.label.toLowerCase()} clinics with mock availability on ${selectedDateLabel}.`
+                      ? `Showing ${currentCategory.label.toLowerCase()} clinics available on selected date: ${selectedDateLabel}.`
                       : "Compare clinics, ratings, addresses, and map positions in one calm browsing flow."}
               </p>
               <div className="mt-4 flex flex-wrap gap-2 sm:gap-3">

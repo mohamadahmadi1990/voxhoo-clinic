@@ -1,6 +1,5 @@
 import { neon } from "@neondatabase/serverless";
-import { addDays, format } from "date-fns";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import type { ClinicCategorySlug } from "../lib/clinic-categories";
 import type { ClinicListItem } from "../lib/clinic-list-item";
@@ -13,7 +12,13 @@ import {
   getMockClinicsByCategory,
   getTopMockClinics,
 } from "../lib/mock-clinics";
-import { getNearestClinicArea, type ClinicArea, type UserLocation } from "../lib/clinic-search";
+import {
+  clinicAreas,
+  getNearestClinicArea,
+  type ClinicArea,
+  type ClinicAreaLabel,
+  type UserLocation,
+} from "../lib/clinic-search";
 
 export type { ClinicListItem } from "../lib/clinic-list-item";
 
@@ -55,18 +60,97 @@ export async function getClinicsByCategory(
 export async function getStoredClinicsByCategory(
   category: ClinicCategorySlug,
 ): Promise<ClinicListItem[]> {
+  return getClinicsByCategoryLocationAndDate(category);
+}
+
+export async function getClinicsByCategoryLocationAndDate(
+  category: ClinicCategorySlug,
+  options: {
+    selectedLocation?: ClinicArea | null;
+    userLocation?: UserLocation | null;
+    date?: string | null;
+  } = {},
+): Promise<ClinicListItem[]> {
   if (!hasDatabaseUrl()) {
     return [];
   }
 
-  const { clinics } = await import("./schema");
-  const db = getDb();
-  const rows = await db
-    .select()
-    .from(clinics)
-    .where(eq(clinics.category, category));
+  void options.selectedLocation;
+  void options.userLocation;
 
-  return rows
+  const { clinics, clinicTimeSlots } = await import("./schema");
+  const db = getDb();
+  const clinicSelection = {
+    id: clinics.id,
+    name: clinics.name,
+    category: clinics.category,
+    address: clinics.address,
+    area: clinics.area,
+    lat: clinics.lat,
+    lng: clinics.lng,
+    rating: clinics.rating,
+    phone: clinics.phone,
+  };
+
+  const clinicRows = options.date
+    ? await db
+        .selectDistinct(clinicSelection)
+        .from(clinics)
+        .innerJoin(
+          clinicTimeSlots,
+          and(
+            eq(clinicTimeSlots.clinicId, clinics.id),
+            eq(clinicTimeSlots.status, "available"),
+            eq(clinicTimeSlots.slotDate, options.date),
+          ),
+        )
+        .where(eq(clinics.category, category))
+    : await db
+        .select(clinicSelection)
+        .from(clinics)
+        .where(eq(clinics.category, category));
+
+  if (clinicRows.length === 0) {
+    return [];
+  }
+
+  const clinicIds = clinicRows.map((clinic) => clinic.id);
+  const slotRows = await db
+    .select({
+      clinicId: clinicTimeSlots.clinicId,
+      slotDate: clinicTimeSlots.slotDate,
+      startTime: clinicTimeSlots.startTime,
+    })
+    .from(clinicTimeSlots)
+    .where(
+      and(
+        inArray(clinicTimeSlots.clinicId, clinicIds),
+        eq(clinicTimeSlots.status, "available"),
+      ),
+    );
+
+  const slotDatesByClinicId = new Map<number, string[]>();
+  const slotTimesByClinicId = new Map<number, string[]>();
+
+  for (const slot of slotRows) {
+    const currentDates = slotDatesByClinicId.get(slot.clinicId) ?? [];
+
+    if (!currentDates.includes(slot.slotDate)) {
+      currentDates.push(slot.slotDate);
+      slotDatesByClinicId.set(slot.clinicId, currentDates);
+    }
+
+    if (options.date && slot.slotDate === options.date) {
+      const currentTimes = slotTimesByClinicId.get(slot.clinicId) ?? [];
+
+      if (!currentTimes.includes(slot.startTime)) {
+        currentTimes.push(slot.startTime);
+        slotTimesByClinicId.set(slot.clinicId, currentTimes);
+      }
+    }
+  }
+
+  return clinicRows
     .map((clinic) => ({
       id: clinic.id,
       name: clinic.name,
@@ -76,11 +160,16 @@ export async function getStoredClinicsByCategory(
       lng: clinic.lng,
       rating: clinic.rating,
       phone: clinic.phone,
-      area: getNearestClinicArea({
+      area: normalizeStoredClinicArea(clinic.area, {
         lat: clinic.lat,
         lng: clinic.lng,
-      }).label,
-      availableDates: generateAvailableDatesForStoredClinic(category, clinic.name),
+      }),
+      availableDates: (slotDatesByClinicId.get(clinic.id) ?? []).sort((left, right) =>
+        left.localeCompare(right),
+      ),
+      availableTimeSlots: (slotTimesByClinicId.get(clinic.id) ?? [])
+        .sort((left, right) => left.localeCompare(right))
+        .slice(0, 3),
     }))
     .sort((left, right) => left.name.localeCompare(right.name));
 }
@@ -152,49 +241,15 @@ function getErrorMessage(error: unknown) {
   return String(error);
 }
 
-const availabilityStartDate = new Date("2026-05-10T00:00:00");
-const availabilityDatePool = Array.from({ length: 7 }, (_, index) =>
-  format(addDays(availabilityStartDate, index), "yyyy-MM-dd"),
-);
+function normalizeStoredClinicArea(
+  area: string | null,
+  location: { lat: number; lng: number },
+): ClinicAreaLabel {
+  const matchedArea = clinicAreas.find((clinicArea) => clinicArea.label === area);
 
-function generateAvailableDatesForStoredClinic(category: ClinicCategorySlug, name: string) {
-  const random = createSeededRandom(`${category}::${name}`);
-  const shuffledDates = [...availabilityDatePool];
-
-  for (let index = shuffledDates.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(random() * (index + 1));
-    const currentDate = shuffledDates[index];
-
-    shuffledDates[index] = shuffledDates[swapIndex];
-    shuffledDates[swapIndex] = currentDate;
+  if (matchedArea) {
+    return matchedArea.label;
   }
 
-  const dateCount = 2 + Math.floor(random() * 3);
-
-  return shuffledDates.slice(0, dateCount).sort((left, right) => left.localeCompare(right));
-}
-
-function createSeededRandom(seed: string) {
-  let state = hashSeed(seed) || 1;
-
-  return () => {
-    state += 0x6d2b79f5;
-
-    let value = state;
-    value = Math.imul(value ^ (value >>> 15), value | 1);
-    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-
-    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function hashSeed(seed: string) {
-  let hash = 2166136261;
-
-  for (const character of seed) {
-    hash ^= character.charCodeAt(0);
-    hash = Math.imul(hash, 16777619);
-  }
-
-  return hash >>> 0;
+  return getNearestClinicArea(location).label;
 }

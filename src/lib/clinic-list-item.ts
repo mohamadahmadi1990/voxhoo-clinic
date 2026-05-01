@@ -12,4 +12,5 @@ export type ClinicListItem = {
   rating: number;
   phone: string;
   availableDates: string[];
+  availableTimeSlots?: string[];
 };
