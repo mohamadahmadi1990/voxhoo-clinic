@@ -1,9 +1,10 @@
 "use client";
 
 import { format } from "date-fns";
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { CalendarDays, MapPin, Phone, Star, X } from "lucide-react";
+import { submitAppointmentRequest } from "@/app/actions/create-appointment-request";
 import { CategoryIcon } from "@/components/category-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,26 @@ export function ClinicDetailDrawer({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [isRequestFormOpen, setIsRequestFormOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [patientName, setPatientName] = useState("");
+  const [patientEmail, setPatientEmail] = useState("");
+  const [patientPhone, setPatientPhone] = useState("");
+  const [note, setNote] = useState("");
+  const [requestError, setRequestError] = useState<string | null>(null);
+  const [requestSuccess, setRequestSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsRequestFormOpen(false);
+    setPatientName("");
+    setPatientEmail("");
+    setPatientPhone("");
+    setNote("");
+    setRequestError(null);
+    setRequestSuccess(null);
+    setIsSubmitting(false);
+  }, [clinic?.id, selectedTimeSlot, selectedDateLabel]);
 
   useEffect(() => {
     if (!clinic || !containerRef.current || !dialogRef.current) {
@@ -130,7 +151,6 @@ export function ClinicDetailDrawer({
   const phoneDigits = clinic.phone.replace(/[^\d+]/g, "");
   const canCallClinic = Boolean(phoneDigits);
   const dialHref = canCallClinic ? `tel:${phoneDigits}` : null;
-  const availableTimeSlots = clinic.availableTimeSlots ?? [];
   const timeSlots = clinic.timeSlots ?? [];
   const availabilityDateLabel = selectedDateLabel
     ? selectedDateLabel
@@ -138,6 +158,8 @@ export function ClinicDetailDrawer({
       ? formatAvailabilityDate(clinic.availabilityDate)
       : null;
   const hasAvailability = Boolean(availabilityDateLabel && timeSlots.length);
+  const selectedSlotDate = clinic.availabilityDate;
+  const canRequestSelectedTime = Boolean(selectedTimeSlot && selectedSlotDate);
 
   return createPortal(
     <div ref={containerRef} className="fixed inset-0 z-50">
@@ -275,15 +297,172 @@ export function ClinicDetailDrawer({
                         );
                       })}
                     </div>
-                    <Button
-                      type="button"
-                      variant="default"
-                      size="lg"
-                      className="mt-5 h-12 rounded-full px-6"
-                      disabled={!availableTimeSlots.length}
-                    >
-                      Request appointment
-                    </Button>
+                    {selectedTimeSlot ? (
+                      <div className="mt-5">
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="lg"
+                          className="h-12 rounded-full px-6"
+                          disabled={!canRequestSelectedTime || isPending}
+                          onClick={() => {
+                            setIsRequestFormOpen((currentValue) => !currentValue);
+                            setRequestError(null);
+                            setRequestSuccess(null);
+                          }}
+                        >
+                          Request this time
+                        </Button>
+
+                        {isRequestFormOpen ? (
+                          <form
+                            className="mt-4 space-y-3 rounded-[24px] border border-border bg-white p-4"
+                            onSubmit={(event) => {
+                              event.preventDefault();
+
+                              if (isSubmitting) {
+                                return;
+                              }
+
+                              if (!selectedTimeSlot || !selectedSlotDate) {
+                                setRequestError("Choose an available time first.");
+                                return;
+                              }
+
+                              setRequestError(null);
+                              setRequestSuccess(null);
+                              setIsSubmitting(true);
+
+                              startTransition(async () => {
+                                const result = await submitAppointmentRequest({
+                                  clinicId: clinic.id,
+                                  slotDate: selectedSlotDate,
+                                  startTime: selectedTimeSlot,
+                                  patientName,
+                                  patientEmail,
+                                  patientPhone,
+                                  note,
+                                });
+
+                                if (!result.ok) {
+                                  setRequestError(result.error);
+                                  setIsSubmitting(false);
+                                  return;
+                                }
+
+                                setPatientName("");
+                                setPatientEmail("");
+                                setPatientPhone("");
+                                setNote("");
+                                setIsRequestFormOpen(false);
+                                setRequestSuccess(
+                                  "Request sent. The clinic will contact you.",
+                                );
+                                setIsSubmitting(false);
+                              });
+                            }}
+                          >
+                            <div className="grid gap-3 sm:grid-cols-2">
+                              <label className="block text-sm">
+                                <span className="mb-1.5 block font-medium text-foreground">
+                                  Name
+                                </span>
+                                <input
+                                  type="text"
+                                  value={patientName}
+                                  onChange={(event) => {
+                                    setPatientName(event.target.value);
+                                  }}
+                                  required
+                                  className="h-11 w-full rounded-2xl border border-border px-3 text-sm outline-none transition-colors focus:border-primary"
+                                />
+                              </label>
+                              <label className="block text-sm">
+                                <span className="mb-1.5 block font-medium text-foreground">
+                                  Email
+                                </span>
+                                <input
+                                  type="email"
+                                  value={patientEmail}
+                                  onChange={(event) => {
+                                    setPatientEmail(event.target.value);
+                                  }}
+                                  className="h-11 w-full rounded-2xl border border-border px-3 text-sm outline-none transition-colors focus:border-primary"
+                                />
+                              </label>
+                            </div>
+                            <label className="block text-sm">
+                              <span className="mb-1.5 block font-medium text-foreground">
+                                Phone
+                              </span>
+                              <input
+                                type="tel"
+                                value={patientPhone}
+                                onChange={(event) => {
+                                  setPatientPhone(event.target.value);
+                                }}
+                                className="h-11 w-full rounded-2xl border border-border px-3 text-sm outline-none transition-colors focus:border-primary"
+                              />
+                            </label>
+                            <label className="block text-sm">
+                              <span className="mb-1.5 block font-medium text-foreground">
+                                Note
+                              </span>
+                              <textarea
+                                value={note}
+                                onChange={(event) => {
+                                  setNote(event.target.value);
+                                }}
+                                rows={3}
+                                className="w-full rounded-2xl border border-border px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+                              />
+                            </label>
+                            <p className="text-xs text-muted-foreground">
+                              Please include either an email or phone number.
+                            </p>
+                            {requestError ? (
+                              <p className="text-sm font-medium text-destructive">
+                                {requestError}
+                              </p>
+                            ) : null}
+                            {requestSuccess ? (
+                              <p className="text-sm font-medium text-primary">
+                                {requestSuccess}
+                              </p>
+                            ) : null}
+                            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="lg"
+                                className="h-11 rounded-full px-5"
+                                onClick={() => {
+                                  setIsRequestFormOpen(false);
+                                  setRequestError(null);
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                type="submit"
+                                variant="default"
+                                size="lg"
+                                className="h-11 rounded-full px-5"
+                                disabled={isSubmitting || isPending}
+                              >
+                                {isSubmitting || isPending ? "Sending..." : "Send request"}
+                              </Button>
+                            </div>
+                          </form>
+                        ) : null}
+
+                        {requestSuccess && !isRequestFormOpen ? (
+                          <p className="mt-3 text-sm font-medium text-primary">
+                            {requestSuccess}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </>
                 ) : (
                   <p className="mt-5 text-sm leading-7 text-muted-foreground">

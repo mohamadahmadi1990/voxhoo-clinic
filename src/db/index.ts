@@ -22,6 +22,16 @@ import {
 
 export type { ClinicListItem } from "../lib/clinic-list-item";
 
+type CreateAppointmentRequestInput = {
+  clinicId: number;
+  slotDate: string;
+  startTime: string;
+  patientName: string;
+  patientEmail?: string;
+  patientPhone?: string;
+  note?: string;
+};
+
 export type SafeClinicFetchResult = {
   clinics: ClinicListItem[];
   source: "places" | "mock";
@@ -186,6 +196,64 @@ export async function getClinicsByCategoryLocationAndDate(
       };
     })
     .sort((left, right) => left.name.localeCompare(right.name));
+}
+
+export async function createAppointmentRequest(
+  input: CreateAppointmentRequestInput,
+) {
+  const patientName = input.patientName.trim();
+  const patientEmail = input.patientEmail?.trim() ?? "";
+  const patientPhone = input.patientPhone?.trim() ?? "";
+  const note = input.note?.trim() ?? "";
+  const startTime = input.startTime.trim();
+  const normalizedStartTime =
+    startTime.length === 5 ? `${startTime}:00` : startTime;
+
+  if (!patientName) {
+    throw new Error("Name is required.");
+  }
+
+  if (!patientEmail && !patientPhone) {
+    throw new Error("Email or phone is required.");
+  }
+
+  if (patientEmail && !/^\S+@\S+\.\S+$/.test(patientEmail)) {
+    throw new Error("Enter a valid email address.");
+  }
+
+  const { appointmentRequests, clinicTimeSlots } = await import("./schema");
+  const db = getDb();
+  const matchingSlot = await db
+    .select({ id: clinicTimeSlots.id })
+    .from(clinicTimeSlots)
+    .where(
+      and(
+        eq(clinicTimeSlots.clinicId, input.clinicId),
+        eq(clinicTimeSlots.slotDate, input.slotDate),
+        eq(clinicTimeSlots.startTime, normalizedStartTime),
+        eq(clinicTimeSlots.status, "available"),
+      ),
+    )
+    .limit(1);
+
+  if (matchingSlot.length === 0) {
+    throw new Error("This time is no longer available.");
+  }
+
+  const [appointmentRequest] = await db
+    .insert(appointmentRequests)
+    .values({
+      clinicId: input.clinicId,
+      slotDate: input.slotDate,
+      startTime: normalizedStartTime,
+      patientName,
+      patientEmail: patientEmail || null,
+      patientPhone: patientPhone || null,
+      note: note || null,
+    })
+    .returning();
+
+  return appointmentRequest;
 }
 
 export async function getTopClinics(limit = 8): Promise<ClinicListItem[]> {

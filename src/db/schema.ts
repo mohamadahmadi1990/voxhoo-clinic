@@ -44,7 +44,24 @@ export const clinicTimeSlots = pgTable("clinic_time_slots", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const appointmentRequests = pgTable("appointment_requests", {
+  id: serial("id").primaryKey(),
+  clinicId: integer("clinic_id")
+    .references(() => clinics.id, { onDelete: "cascade" })
+    .notNull(),
+  slotDate: date("slot_date", { mode: "string" }).notNull(),
+  startTime: text("start_time").notNull(),
+  patientName: text("patient_name").notNull(),
+  patientEmail: text("patient_email"),
+  patientPhone: text("patient_phone"),
+  note: text("note"),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export type Clinic = typeof clinics.$inferSelect;
 export type NewClinic = typeof clinics.$inferInsert;
 export type ClinicTimeSlot = typeof clinicTimeSlots.$inferSelect;
 export type NewClinicTimeSlot = typeof clinicTimeSlots.$inferInsert;
+export type AppointmentRequest = typeof appointmentRequests.$inferSelect;
+export type NewAppointmentRequest = typeof appointmentRequests.$inferInsert;
