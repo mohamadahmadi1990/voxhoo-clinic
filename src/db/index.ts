@@ -1,5 +1,5 @@
 import { neon } from "@neondatabase/serverless";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import type { ClinicCategorySlug } from "../lib/clinic-categories";
 import type { ClinicListItem } from "../lib/clinic-list-item";
@@ -254,6 +254,33 @@ export async function createAppointmentRequest(
     .returning();
 
   return appointmentRequest;
+}
+
+export async function getAppointmentRequests() {
+  if (!hasDatabaseUrl()) {
+    return [];
+  }
+
+  const { appointmentRequests, clinics } = await import("./schema");
+  const db = getDb();
+
+  return db
+    .select({
+      id: appointmentRequests.id,
+      clinicId: appointmentRequests.clinicId,
+      clinicName: clinics.name,
+      slotDate: appointmentRequests.slotDate,
+      startTime: appointmentRequests.startTime,
+      patientName: appointmentRequests.patientName,
+      patientEmail: appointmentRequests.patientEmail,
+      patientPhone: appointmentRequests.patientPhone,
+      note: appointmentRequests.note,
+      status: appointmentRequests.status,
+      createdAt: appointmentRequests.createdAt,
+    })
+    .from(appointmentRequests)
+    .innerJoin(clinics, eq(appointmentRequests.clinicId, clinics.id))
+    .orderBy(desc(appointmentRequests.createdAt));
 }
 
 export async function getTopClinics(limit = 8): Promise<ClinicListItem[]> {
