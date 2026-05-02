@@ -162,29 +162,50 @@ export function ClinicDetailDrawer({
             event.stopPropagation();
           }}
         >
-          <div className={cn("relative overflow-hidden px-5 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5", theme.background)}>
+          <div className={cn("relative overflow-hidden px-4 pb-4 pt-3 sm:px-5 sm:pb-5 sm:pt-4", theme.background)}>
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.96),transparent_38%)]" />
             <div className="relative z-10">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      "flex h-11 w-11 items-center justify-center rounded-2xl shadow-sm sm:h-12 sm:w-12",
-                      theme.iconBg,
-                    )}
-                  >
-                    <CategoryIcon
-                      category={categorySlug}
-                      className={cn("h-5 w-5", theme.iconColor)}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                      Voxhoo Clinic
-                    </p>
-                    <Badge className="mt-2 rounded-full bg-white px-3 py-1 text-[0.72rem] font-semibold text-foreground shadow-sm">
-                      {categoryLabel}
-                    </Badge>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start gap-2.5">
+                    <div
+                      className={cn(
+                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl shadow-sm sm:h-11 sm:w-11",
+                        theme.iconBg,
+                      )}
+                    >
+                      <CategoryIcon
+                        category={categorySlug}
+                        className={cn("h-5 w-5", theme.iconColor)}
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h2
+                        id={titleId}
+                        className="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+                      >
+                        {clinic.name}
+                      </h2>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                        <Badge className="inline-flex h-8 items-center rounded-full bg-white px-3 py-1 text-sm font-medium text-foreground shadow-sm">
+                          {categoryLabel}
+                        </Badge>
+                        <div className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white px-3 py-1 text-sm font-medium text-foreground shadow-sm">
+                          <Star className="h-4 w-4 fill-current text-foreground" />
+                          <span>{clinic.rating.toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 space-y-1.5 text-sm">
+                        <div className="flex items-start gap-2 text-muted-foreground">
+                          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                          <span className="line-clamp-2">{clinic.address}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="h-4 w-4 shrink-0 text-primary" />
+                          <span className="truncate">{clinic.phone}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -203,44 +224,10 @@ export function ClinicDetailDrawer({
                 </Button>
               </div>
 
-              <div className="mt-6 sm:mt-8">
-                <h2
-                  id={titleId}
-                  className="max-w-lg text-2xl font-semibold tracking-tight text-foreground sm:text-[2.1rem]"
-                >
-                  {clinic.name}
-                </h2>
-                <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-foreground shadow-sm">
-                  <Star className="h-4 w-4 fill-current text-foreground" />
-                  {clinic.rating.toFixed(1)} rating
-                </div>
-              </div>
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <section className="surface-soft rounded-[24px] px-5 py-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Address
-                </p>
-                <div className="mt-3 flex items-start gap-3 text-sm leading-6 text-foreground">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span>{clinic.address}</span>
-                </div>
-              </section>
-
-              <section className="surface-soft rounded-[24px] px-5 py-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Phone
-                </p>
-                <div className="mt-3 flex items-start gap-3 text-sm leading-6 text-foreground">
-                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span>{clinic.phone}</span>
-                </div>
-              </section>
-            </div>
-
             {availabilityDateLabel ? (
               <section className="mt-4 surface-panel rounded-[28px] border border-border px-5 py-5">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
