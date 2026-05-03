@@ -114,10 +114,10 @@ export default async function ClinicsByCategoryPage({
         queryString={sharedQuery}
       />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-8 lg:px-10">
+      <main className="mx-auto w-full max-w-7xl px-0 py-0 md:px-4 md:py-6 lg:px-10">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-start gap-4">
-            <div>
+            <div className="hidden md:block">
               <Link
                 href="/"
                 className={cn(
@@ -169,7 +169,9 @@ export default async function ClinicsByCategoryPage({
                 ) : null}
               </div>
             </div>
-            <ResultsSortSelect value={selectedSort} />
+            <div className="hidden md:block">
+              <ResultsSortSelect value={selectedSort} />
+            </div>
           </div>
 
           {locationFallbackNotice ? <DataNotice message={locationFallbackNotice} /> : null}
@@ -181,6 +183,7 @@ export default async function ClinicsByCategoryPage({
             selectedDateLabel={selectedDateLabel}
             selectedLocationLabel={selectedLocationLabel}
             selectedAreaCenter={selectedLocation?.center ?? null}
+            selectedSort={selectedSort}
             userLocation={userLocation}
           />
         </div>

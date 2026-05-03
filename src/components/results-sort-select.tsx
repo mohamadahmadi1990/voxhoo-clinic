@@ -3,9 +3,11 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { ClinicSortOption } from "@/lib/clinic-search";
+import { cn } from "@/lib/utils";
 
 type ResultsSortSelectProps = {
   value: ClinicSortOption;
+  className?: string;
 };
 
 const sortLabels: Record<ClinicSortOption, string> = {
@@ -14,7 +16,7 @@ const sortLabels: Record<ClinicSortOption, string> = {
   name: "A-Z",
 };
 
-export function ResultsSortSelect({ value }: ResultsSortSelectProps) {
+export function ResultsSortSelect({ value, className }: ResultsSortSelectProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -41,7 +43,10 @@ export function ResultsSortSelect({ value }: ResultsSortSelectProps) {
     >
       <SelectTrigger
         aria-label="Sort clinics"
-        className="h-10 min-w-[156px] rounded-full bg-white text-sm shadow-sm"
+        className={cn(
+          "h-10 min-w-[156px] rounded-full bg-white text-sm shadow-sm",
+          className,
+        )}
       >
         <SelectValue placeholder={sortLabels[value]} />
       </SelectTrigger>

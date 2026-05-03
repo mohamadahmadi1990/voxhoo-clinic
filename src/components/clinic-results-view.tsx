@@ -7,6 +7,7 @@ import { Compass, MapPin, Phone, Star } from "lucide-react";
 import { CategoryIcon } from "@/components/category-icon";
 import { ClinicDetailDrawer } from "@/components/clinic-detail-drawer";
 import { ClinicMap } from "@/components/clinic-map";
+import { ResultsSortSelect } from "@/components/results-sort-select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +22,7 @@ import type { ClinicCategorySlug } from "@/lib/clinic-categories";
 import {
   formatDistanceLabel,
   getDistanceInKilometers,
+  type ClinicSortOption,
   type UserLocation,
 } from "@/lib/clinic-search";
 import { getCategoryTheme } from "@/lib/category-theme";
@@ -33,6 +35,7 @@ type ClinicResultsViewProps = {
   selectedDateLabel?: string | null;
   selectedLocationLabel?: string | null;
   selectedAreaCenter?: UserLocation | null;
+  selectedSort: ClinicSortOption;
   userLocation?: UserLocation | null;
 };
 
@@ -43,6 +46,7 @@ export function ClinicResultsView({
   selectedDateLabel = null,
   selectedLocationLabel = null,
   selectedAreaCenter = null,
+  selectedSort,
   userLocation = null,
 }: ClinicResultsViewProps) {
   const [activeClinicId, setActiveClinicId] = useState<number | null>(null);
@@ -140,11 +144,11 @@ export function ClinicResultsView({
 
   return (
     <>
-      <section className="relative h-screen min-h-screen md:hidden">
+      <section className="relative -mx-4 h-[100dvh] min-h-[100dvh] overflow-hidden md:hidden">
         <div
           ref={mapSectionRef}
           tabIndex={-1}
-          className="relative h-screen"
+          className="relative h-[100dvh]"
         >
           <ClinicMap
             clinics={clinics}
@@ -195,7 +199,7 @@ export function ClinicResultsView({
               </Badge>
             </div>
 
-            <div className={cn("flex gap-2", drawerHeight === "collapsed" && "hidden")}>
+            <div className={cn("flex flex-wrap gap-2", drawerHeight === "collapsed" && "hidden")}>
               <Button
                 type="button"
                 variant="outline"
@@ -218,6 +222,10 @@ export function ClinicResultsView({
               >
                 Show list
               </Button>
+              <ResultsSortSelect
+                value={selectedSort}
+                className="h-9 rounded-full border-border bg-white px-3.5 shadow-none"
+              />
             </div>
 
             {drawerHeight === "collapsed" ? (

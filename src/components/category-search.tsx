@@ -196,7 +196,7 @@ export function CategorySearch({
             <p className={segmentLabelClass}>Category</p>
             <div className="mt-1">
               <Select
-                value={selectedCategory}
+                value={selectedCategory ?? ""}
                 items={categories.map((category) => ({
                   label: category.label,
                   value: category.slug,
@@ -303,7 +303,7 @@ export function CategorySearch({
             <p className={segmentLabelClass}>Location</p>
             <div className="mt-1">
               <Select
-                value={selectedLocation}
+                value={selectedLocation ?? ""}
                 items={locationOptions.map((option) => ({
                   label: option.label,
                   value: option.value,
