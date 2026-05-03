@@ -127,6 +127,13 @@ export function ClinicResultsView({
       : drawerHeight === "expanded"
         ? "h-[88vh]"
         : "h-[50vh]";
+  const resultsSummary = selectedLocationLabel && selectedDateLabel
+    ? `Showing ${categoryLabel.toLowerCase()} clinics for ${selectedLocationLabel}. Available on ${selectedDateLabel}.`
+    : selectedLocationLabel
+      ? `Showing ${categoryLabel.toLowerCase()} clinics for ${selectedLocationLabel}.`
+      : selectedDateLabel
+        ? `Showing ${categoryLabel.toLowerCase()} clinics available on ${selectedDateLabel}.`
+        : `Showing ${categoryLabel.toLowerCase()} clinics in this search.`;
 
   function toggleDrawerHeight() {
     setDrawerHeight((currentHeight) => {
@@ -187,12 +194,10 @@ export function ClinicResultsView({
 
             <div className={cn("flex items-start justify-between gap-3", drawerHeight === "collapsed" && "hidden")}>
               <div>
-                <h2 className="text-lg font-semibold text-foreground">Clinic list</h2>
-                <p className="text-sm text-muted-foreground">
-                  {userLocation
-                    ? "Clinics are sorted by distance from your location."
-                    : "Browse clinics and open details."}
-                </p>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {clinics.length} {categoryLabel} clinics
+                </h2>
+                <p className="text-sm text-muted-foreground">{resultsSummary}</p>
               </div>
               <Badge variant="outline" className="bg-white px-3 py-1 shadow-sm">
                 {clinics.length} results
@@ -388,22 +393,21 @@ export function ClinicResultsView({
         <div className="order-2 space-y-4 scrollbar-hide lg:order-1 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto lg:pr-2">
           <div className="flex flex-col items-start justify-between gap-3 px-1 sm:flex-row sm:items-center sm:gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Clinic list</h2>
-              <p className="text-sm text-muted-foreground">
-                {userLocation
-                  ? "Clinics are sorted by distance from your location. Select a card to center the map or open more details."
-                  : "Select a card to center the map or open more clinic details."}
-              </p>
-            </div>
-            <div className="flex flex-wrap justify-end gap-2">
-              {userLocation ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-lg font-semibold text-foreground">
+                  {categoryLabel} clinics
+                </h2>
                 <Badge variant="outline" className="bg-white px-3 py-1 shadow-sm">
-                  Nearest first
+                  {clinics.length} results
                 </Badge>
-              ) : null}
-              <Badge variant="outline" className="bg-white px-3 py-1 shadow-sm">
-                {clinics.length} results
-              </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">{resultsSummary}</p>
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <ResultsSortSelect
+                value={selectedSort}
+                className="border-border bg-white px-3.5 shadow-sm"
+              />
             </div>
           </div>
 

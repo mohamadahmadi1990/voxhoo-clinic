@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, LocateFixed, MapPin } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
-import { CategoryRail } from "@/components/category-rail";
 import { ClinicResultsView } from "@/components/clinic-results-view";
 import { DataNotice } from "@/components/data-notice";
 import { ResultsSortSelect } from "@/components/results-sort-select";
 import { SiteHeader } from "@/components/site-header";
 import { buttonVariants } from "@/components/ui/button";
 import { getClinicsByCategoryLocationAndDate } from "@/db";
-import { clinicCategories, getCategoryBySlug } from "@/lib/clinic-categories";
+import { getCategoryBySlug } from "@/lib/clinic-categories";
 import { refineClinicsForResults } from "@/lib/clinic-results";
 import {
-  buildClinicSearchQuery,
   formatSearchDateLabel,
   normalizeLocationParam,
   normalizeSearchDateParam,
@@ -85,12 +83,6 @@ export default async function ClinicsByCategoryPage({
     ? formatSearchDateLabel(selectedDate)
     : null;
   const selectedLocationLabel = selectedLocation?.label ?? null;
-  const sharedQuery = buildClinicSearchQuery({
-    date: selectedDate,
-    location: selectedLocation?.slug ?? null,
-    userLocation,
-    sort: selectedSort,
-  });
   const locationFallbackNotice =
     isLocationFallback && selectedLocation
       ? `No ${currentCategory.label.toLowerCase()} clinics are listed in ${selectedLocation.label} yet, so we're showing nearby Toronto-area clinics instead.`
@@ -108,70 +100,20 @@ export default async function ClinicsByCategoryPage({
           userLocation,
         }}
       />
-      <CategoryRail
-        categories={clinicCategories}
-        activeCategory={currentCategory.slug}
-        queryString={sharedQuery}
-      />
 
       <main className="mx-auto -mt-[61px] w-full max-w-7xl px-0 py-0 md:mt-0 md:px-4 md:py-6 lg:px-10">
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col items-start gap-4">
-            <div className="hidden md:block">
-              <Link
-                href="/"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "mb-3 hidden rounded-full px-3 text-muted-foreground md:inline-flex",
-                )}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Link>
-              <p className="text-sm font-medium text-muted-foreground">
-                Toronto clinic search
-              </p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                {clinics.length} {currentCategory.label} clinics
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-                {selectedLocationLabel && selectedDateLabel
-                  ? `Showing ${currentCategory.label.toLowerCase()} clinics for ${selectedLocationLabel}. Available on selected date: ${selectedDateLabel}.`
-                  : selectedLocationLabel
-                    ? `Showing ${currentCategory.label.toLowerCase()} clinics for ${selectedLocationLabel}.`
-                    : selectedDateLabel
-                      ? `Showing ${currentCategory.label.toLowerCase()} clinics available on selected date: ${selectedDateLabel}.`
-                      : "Compare clinics, ratings, addresses, and map positions in one calm browsing flow."}
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2 sm:gap-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-3 py-2 text-xs font-medium text-foreground shadow-sm sm:px-4 sm:text-sm">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <span>Toronto clinics</span>
-                </div>
-
-                {userLocation ? (
-                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/18 bg-accent px-3 py-2 text-xs font-medium text-foreground shadow-sm sm:px-4 sm:text-sm">
-                    <LocateFixed className="h-4 w-4 text-primary" />
-                    <span>Near your location</span>
-                  </div>
-                ) : selectedLocationLabel ? (
-                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/18 bg-accent px-3 py-2 text-xs font-medium text-foreground shadow-sm sm:px-4 sm:text-sm">
-                    <LocateFixed className="h-4 w-4 text-primary" />
-                    <span>{selectedLocationLabel}</span>
-                  </div>
-                ) : null}
-
-                {selectedDateLabel ? (
-                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/18 bg-accent px-3 py-2 text-xs font-medium text-foreground shadow-sm sm:px-4 sm:text-sm">
-                    <CalendarDays className="h-4 w-4 text-primary" />
-                    <span>{selectedDateLabel}</span>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-            <div className="hidden md:block">
-              <ResultsSortSelect value={selectedSort} />
-            </div>
+          <div className="hidden md:flex">
+            <Link
+              href="/"
+              className={cn(
+                buttonVariants({ variant: "ghost", size: "sm" }),
+                "rounded-full px-3 text-muted-foreground",
+              )}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Link>
           </div>
 
           {locationFallbackNotice ? <DataNotice message={locationFallbackNotice} /> : null}
