@@ -184,9 +184,9 @@ export function CategorySearch({
     ? "text-[0.58rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
     : "text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-[0.7rem] sm:tracking-[0.18em]";
   const segmentValueClass = isCompact
-    ? "mt-0.5 text-[0.9rem] font-medium text-foreground md:text-[0.8rem]"
+    ? "mt-0.5 text-base font-medium text-foreground md:text-[0.8rem]"
     : "mt-1 text-[0.92rem] font-medium text-foreground sm:text-[0.98rem]";
-  const triggerTextClass = isCompact ? "text-[0.9rem] md:text-[0.8rem]" : "text-[0.92rem] sm:text-base";
+  const triggerTextClass = isCompact ? "text-base md:text-[0.8rem]" : "text-base sm:text-base";
   const submitButtonClass = isCompact
     ? "h-10 w-full rounded-[18px] p-0 md:ml-0.5 md:mr-0 md:size-8 md:self-center md:rounded-full"
     : "h-12 w-full rounded-[18px] p-0 sm:h-14 md:ml-2 md:mr-0 md:size-16 md:self-center md:rounded-full";
