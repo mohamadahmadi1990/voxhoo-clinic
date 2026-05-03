@@ -17,13 +17,13 @@ export function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("w-[308px] bg-white p-4", className)}
+      className={cn("w-[308px] bg-white px-4 pb-4 pt-5", className)}
       classNames={{
         months: "flex w-full flex-col",
         month: "w-full space-y-4",
-        month_caption: "relative flex h-9 items-center justify-center",
+        month_caption: "relative flex h-10 items-center justify-center px-12",
         caption_label: "text-sm font-semibold text-foreground",
-        nav: "absolute inset-x-0 top-0 flex items-center justify-between",
+        nav: "absolute inset-x-0 top-1 flex items-center justify-between px-3",
         button_previous: cn(
           buttonVariants({ variant: "outline", size: "icon-sm" }),
           "h-8 w-8 rounded-full bg-white p-0 shadow-sm opacity-90 hover:opacity-100",

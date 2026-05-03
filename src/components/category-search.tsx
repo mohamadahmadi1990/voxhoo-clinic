@@ -8,14 +8,8 @@ import { CalendarDays, Search } from "lucide-react";
 import { CategoryIcon } from "@/components/category-icon";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { ClinicCategory, ClinicCategorySlug } from "@/lib/clinic-categories";
 import {
   buildClinicSearchHref,
@@ -62,6 +56,13 @@ export function CategorySearch({
   const [selectedCategory, setSelectedCategory] = useState<ClinicCategorySlug | null>(
     initialCategory,
   );
+  const [categoryQuery, setCategoryQuery] = useState(() => {
+    if (!initialCategory) {
+      return "";
+    }
+
+    return categories.find((category) => category.slug === initialCategory)?.label ?? "";
+  });
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
     if (!initialDate) {
       return undefined;
@@ -75,7 +76,16 @@ export function CategorySearch({
     initialLocation,
   );
   const [userLocation, setUserLocation] = useState<UserLocation | null>(initialUserLocation);
+  const [locationQuery, setLocationQuery] = useState(() => {
+    if (!initialLocation) {
+      return initialUserLocation ? "Using your location" : "";
+    }
+
+    return clinicAreas.find((area) => area.slug === initialLocation)?.label ?? "";
+  });
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isDateOpen, setIsDateOpen] = useState(false);
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [validationMessage, setValidationMessage] = useState("");
   const [locationMessage, setLocationMessage] = useState("");
   const [isLocating, setIsLocating] = useState(false);
@@ -119,12 +129,15 @@ export function CategorySearch({
           lat: coords.latitude,
           lng: coords.longitude,
         });
+        setLocationQuery("Using your location");
         setLocationMessage("Using your current location to sort clinics by distance.");
         setIsLocating(false);
+        setIsLocationOpen(false);
       },
       () => {
         setSelectedLocation(null);
         setUserLocation(null);
+        setLocationQuery("");
         setLocationMessage(
           "We couldn't access your location. You can still search by category and date.",
         );
@@ -149,14 +162,12 @@ export function CategorySearch({
       ? "text-primary"
       : "text-muted-foreground";
   const selectedDateLabel = selectedDate ? formatSearchDateLabel(selectedDate) : null;
-  const selectedLocationLabel = selectedLocation
-    ? locationOptions.find((option) => option.value === selectedLocation)?.label ?? null
-    : null;
-  const locationValue = isLocating
-    ? "Finding nearby clinics..."
-    : userLocation
-      ? "Using your location"
-      : selectedLocationLabel ?? "Current location";
+  const filteredCategories = categories.filter((category) =>
+    category.label.toLowerCase().includes(categoryQuery.trim().toLowerCase()),
+  );
+  const filteredAreas = clinicAreas.filter((area) =>
+    area.label.toLowerCase().includes(locationQuery.trim().toLowerCase()),
+  );
   const containerClass = isCompact
     ? "mx-auto w-full max-w-[760px]"
     : "mx-auto mt-8 w-full max-w-5xl sm:mt-10";
@@ -180,6 +191,24 @@ export function CategorySearch({
     ? "h-10 w-full rounded-[18px] p-0 md:ml-0.5 md:mr-0 md:size-8 md:self-center md:rounded-full"
     : "h-12 w-full rounded-[18px] p-0 sm:h-14 md:ml-2 md:mr-0 md:size-16 md:self-center md:rounded-full";
 
+  function selectArea(area: (typeof clinicAreas)[number]) {
+    setSelectedLocation(area.slug);
+    setUserLocation(null);
+    setLocationMessage("");
+    setIsLocating(false);
+    setLocationQuery(area.label);
+    setIsLocationOpen(false);
+  }
+
+  function selectCategory(category: ClinicCategory) {
+    setSelectedCategory(category.slug);
+    setCategoryQuery(category.label);
+    setIsCategoryOpen(false);
+    if (validationMessage) {
+      setValidationMessage("");
+    }
+  }
+
   return (
     <div className={cn(containerClass, className)}>
       <form
@@ -195,37 +224,69 @@ export function CategorySearch({
           >
             <p className={segmentLabelClass}>Category</p>
             <div className="mt-1">
-              <Select
-                value={selectedCategory ?? ""}
-                items={categories.map((category) => ({
-                  label: category.label,
-                  value: category.slug,
-                }))}
-                onValueChange={(value) => {
-                  setSelectedCategory(value as ClinicCategorySlug | null);
-                  if (validationMessage) {
-                    setValidationMessage("");
-                  }
-                }}
-              >
-                <SelectTrigger
+              <div className="relative">
+                <Input
+                  type="text"
+                  value={categoryQuery}
                   aria-label="Select clinic category"
                   className={cn(
-                    "h-auto min-h-0 rounded-none border-0 bg-transparent px-0 py-0 font-medium shadow-none hover:bg-transparent focus-visible:ring-0 data-[popup-open]:bg-transparent",
+                    "h-auto min-h-0 rounded-none border-0 bg-transparent px-0 py-0 font-medium shadow-none focus-visible:ring-0",
                     triggerTextClass,
-                    !selectedCategory && "text-muted-foreground",
+                    !categoryQuery && "text-muted-foreground",
                   )}
-                >
-                  <SelectValue placeholder="Choose clinic type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.slug} value={category.slug}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  placeholder="Choose clinic type"
+                  onFocus={() => {
+                    setIsCategoryOpen(true);
+                  }}
+                  onBlur={() => {
+                    window.setTimeout(() => {
+                      setIsCategoryOpen(false);
+                    }, 120);
+                  }}
+                  onChange={(event) => {
+                    const nextQuery = event.target.value;
+                    const exactCategory = categories.find(
+                      (category) =>
+                        category.label.toLowerCase() === nextQuery.trim().toLowerCase(),
+                    );
+
+                    setCategoryQuery(nextQuery);
+                    setIsCategoryOpen(true);
+                    setSelectedCategory(exactCategory?.slug ?? null);
+                    if (validationMessage) {
+                      setValidationMessage("");
+                    }
+                  }}
+                />
+
+                {isCategoryOpen ? (
+                  <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 overflow-hidden rounded-[20px] border border-border bg-white p-1.5 shadow-[0_18px_48px_rgba(0,0,0,0.16)]">
+                    <div className="max-h-64 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgba(100,116,139,0.45)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-400/60 [&::-webkit-scrollbar-track]:bg-transparent">
+                      {filteredCategories.map((category) => (
+                        <button
+                          key={category.slug}
+                          type="button"
+                          className="flex w-full items-center rounded-[16px] px-3 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-secondary"
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                          }}
+                          onClick={() => {
+                            selectCategory(category);
+                          }}
+                        >
+                          {category.label}
+                        </button>
+                      ))}
+
+                      {filteredCategories.length === 0 ? (
+                        <div className="px-3 py-2.5 text-sm text-muted-foreground">
+                          No matching categories
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
 
@@ -302,44 +363,81 @@ export function CategorySearch({
           >
             <p className={segmentLabelClass}>Location</p>
             <div className="mt-1">
-              <Select
-                value={selectedLocation ?? ""}
-                items={locationOptions.map((option) => ({
-                  label: option.label,
-                  value: option.value,
-                }))}
-                onValueChange={(value) => {
-                  const nextValue = value as ClinicAreaSlug | "current-location" | null;
-
-                  if (nextValue === "current-location") {
-                    handleUseMyLocation();
-                    return;
-                  }
-
-                  setSelectedLocation(nextValue);
-                  setUserLocation(null);
-                  setLocationMessage("");
-                  setIsLocating(false);
-                }}
-              >
-                <SelectTrigger
+              <div className="relative">
+                <Input
+                  type="text"
+                  value={locationQuery}
                   aria-label="Choose a location"
                   className={cn(
-                    "h-auto min-h-0 rounded-none border-0 bg-transparent px-0 py-0 font-medium shadow-none hover:bg-transparent focus-visible:ring-0 data-[popup-open]:bg-transparent",
+                    "h-auto min-h-0 rounded-none border-0 bg-transparent px-0 py-0 font-medium shadow-none focus-visible:ring-0",
                     triggerTextClass,
-                    !selectedLocationLabel && !userLocation && !isLocating && "text-muted-foreground",
+                    !locationQuery && !userLocation && !isLocating && "text-muted-foreground",
                   )}
-                >
-                  <SelectValue placeholder={locationValue} />
-                </SelectTrigger>
-                <SelectContent>
-                  {locationOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  placeholder={isLocating ? "Finding nearby clinics..." : "Type a location"}
+                  onFocus={() => {
+                    setIsLocationOpen(true);
+                  }}
+                  onBlur={() => {
+                    window.setTimeout(() => {
+                      setIsLocationOpen(false);
+                    }, 120);
+                  }}
+                  onChange={(event) => {
+                    const nextQuery = event.target.value;
+                    const exactArea = clinicAreas.find(
+                      (area) => area.label.toLowerCase() === nextQuery.trim().toLowerCase(),
+                    );
+
+                    setLocationQuery(nextQuery);
+                    setIsLocationOpen(true);
+                    setUserLocation(null);
+                    setLocationMessage("");
+                    setIsLocating(false);
+                    setSelectedLocation(exactArea?.slug ?? null);
+                  }}
+                />
+
+                {isLocationOpen ? (
+                  <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 overflow-hidden rounded-[20px] border border-border bg-white p-1.5 shadow-[0_18px_48px_rgba(0,0,0,0.16)]">
+                    <div className="max-h-64 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgba(100,116,139,0.45)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-400/60 [&::-webkit-scrollbar-track]:bg-transparent">
+                      <button
+                        type="button"
+                        className="flex w-full items-center rounded-[16px] px-3 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-secondary"
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                        }}
+                        onClick={() => {
+                          handleUseMyLocation();
+                        }}
+                      >
+                        Current location
+                      </button>
+
+                      {filteredAreas.map((area) => (
+                        <button
+                          key={area.slug}
+                          type="button"
+                          className="flex w-full items-center rounded-[16px] px-3 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-secondary"
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                          }}
+                          onClick={() => {
+                            selectArea(area);
+                          }}
+                        >
+                          {area.label}
+                        </button>
+                      ))}
+
+                      {filteredAreas.length === 0 ? (
+                        <div className="px-3 py-2.5 text-sm text-muted-foreground">
+                          No matching locations
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
 
