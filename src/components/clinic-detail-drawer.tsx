@@ -508,11 +508,12 @@ export function ClinicDetailDrawer({
               )}
               <Button
                 type="button"
-                variant="default"
+                variant="outline"
                 size="lg"
-                className="h-12 rounded-full px-6"
+                className="h-12 rounded-full border-primary/20 bg-primary/5 px-6 text-primary hover:bg-primary/10 hover:text-primary"
                 onClick={onFocusOnMap}
               >
+                <MapPin className="h-4 w-4" />
                 Show this clinic on map
               </Button>
             </div>

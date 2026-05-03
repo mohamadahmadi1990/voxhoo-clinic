@@ -15,7 +15,7 @@ export function CategoryRail({
   queryString = "",
 }: CategoryRailProps) {
   return (
-    <div className="air-divider">
+    <div className="hidden air-divider md:block">
       <div className="mx-auto flex w-full max-w-7xl gap-5 overflow-x-auto px-4 py-3 [scrollbar-width:none] sm:gap-7 sm:px-8 sm:py-4 lg:px-10 [&::-webkit-scrollbar]:hidden">
         {categories.map((category) => {
           const isActive = category.slug === activeCategory;

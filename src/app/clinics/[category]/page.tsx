@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, CalendarDays, LocateFixed, MapPin } from "lucide-react";
 import { notFound } from "next/navigation";
-import { CategorySearch } from "@/components/category-search";
 import { CategoryRail } from "@/components/category-rail";
 import { ClinicResultsView } from "@/components/clinic-results-view";
 import { DataNotice } from "@/components/data-notice";
@@ -100,6 +99,8 @@ export default async function ClinicsByCategoryPage({
   return (
     <>
       <SiteHeader
+        mobileBackHref="/"
+        mobileBackLabel="Back"
         searchState={{
           category: currentCategory.slug,
           date: selectedDate,
@@ -113,22 +114,6 @@ export default async function ClinicsByCategoryPage({
         queryString={sharedQuery}
       />
 
-      <section className="air-divider lg:hidden">
-        <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-8">
-          <CategorySearch
-            categories={clinicCategories}
-            variant="compact"
-            initialCategory={currentCategory.slug}
-            initialDate={selectedDate}
-            initialLocation={selectedLocation?.slug ?? null}
-            initialUserLocation={userLocation}
-            showHelperText={false}
-            showCategoryMarquee={false}
-            className="max-w-none"
-          />
-        </div>
-      </section>
-
       <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-8 lg:px-10">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-start gap-4">
@@ -137,7 +122,7 @@ export default async function ClinicsByCategoryPage({
                 href="/"
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "sm" }),
-                  "mb-3 rounded-full px-3 text-muted-foreground",
+                  "mb-3 hidden rounded-full px-3 text-muted-foreground md:inline-flex",
                 )}
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
