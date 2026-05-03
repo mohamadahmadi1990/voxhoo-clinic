@@ -114,7 +114,7 @@ export default async function ClinicsByCategoryPage({
         queryString={sharedQuery}
       />
 
-      <main className="mx-auto w-full max-w-7xl px-0 py-0 md:px-4 md:py-6 lg:px-10">
+      <main className="mx-auto -mt-[61px] w-full max-w-7xl px-0 py-0 md:mt-0 md:px-4 md:py-6 lg:px-10">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-start gap-4">
             <div className="hidden md:block">
