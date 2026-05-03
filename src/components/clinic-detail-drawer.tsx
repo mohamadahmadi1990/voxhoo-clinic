@@ -172,14 +172,14 @@ export function ClinicDetailDrawer({
         }}
       />
 
-      <div className="absolute inset-x-0 bottom-0 max-h-[92vh] rounded-t-[28px] bg-white shadow-[0_-18px_48px_rgba(0,0,0,0.22)] md:inset-y-0 md:left-auto md:max-h-none md:w-full md:max-w-xl md:rounded-l-[32px] md:rounded-r-none">
+      <div className="absolute inset-x-0 bottom-0 h-[92vh] max-h-[92vh] rounded-t-[28px] bg-white shadow-[0_-18px_48px_rgba(0,0,0,0.22)] md:inset-y-0 md:left-auto md:h-full md:max-h-none md:w-full md:max-w-xl md:rounded-l-[32px] md:rounded-r-none">
         <div
           ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
           tabIndex={-1}
-          className="flex h-full flex-col overflow-hidden"
+          className="flex h-full min-h-0 flex-col overflow-hidden"
           onClick={(event) => {
             event.stopPropagation();
           }}
@@ -249,7 +249,7 @@ export function ClinicDetailDrawer({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 touch-pan-y sm:px-6 sm:py-6">
             {availabilityDateLabel ? (
               <section className="mt-4 surface-panel rounded-[28px] border border-border px-5 py-5">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
