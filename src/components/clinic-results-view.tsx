@@ -361,15 +361,24 @@ export function ClinicResultsView({
                         </CardContent>
 
                         <CardFooter className="mt-auto border-t border-border bg-white px-4 py-2.5">
-                          <div className="flex w-full flex-wrap items-center gap-2">
-                            <p className="text-sm text-muted-foreground">
-                              {isActive ? "Selected on map" : "Click card to focus on map"}
-                            </p>
+                          <div className="grid w-full grid-cols-2 gap-2">
                             <Button
                               type="button"
                               variant="outline"
                               size="sm"
-                              className="ml-auto rounded-full px-3.5"
+                              className="w-full rounded-full px-3.5"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                openClinicDetails(clinic.id, event.currentTarget);
+                              }}
+                            >
+                              Clinic page
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="w-full rounded-full px-3.5"
                               onClick={(event) => {
                                 event.stopPropagation();
                                 openClinicDetails(clinic.id, event.currentTarget);
@@ -517,15 +526,24 @@ export function ClinicResultsView({
                       </CardContent>
 
                       <CardFooter className="mt-auto border-t border-border bg-white px-4 py-2.5 sm:px-5 sm:py-3">
-                        <div className="flex w-full flex-wrap items-center gap-2">
-                          <p className="text-sm text-muted-foreground">
-                            {isActive ? "Selected on map" : "Click card to focus on map"}
-                          </p>
+                        <div className="grid w-full grid-cols-2 gap-2">
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="ml-auto rounded-full px-3.5"
+                            className="w-full rounded-full px-3.5"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              openClinicDetails(clinic.id, event.currentTarget);
+                            }}
+                          >
+                            Clinic page
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="w-full rounded-full px-3.5"
                             onClick={(event) => {
                               event.stopPropagation();
                               openClinicDetails(clinic.id, event.currentTarget);
