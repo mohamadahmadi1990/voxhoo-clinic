@@ -32,6 +32,15 @@ type CreateAppointmentRequestInput = {
   note?: string;
 };
 
+export const appointmentRequestStatuses = [
+  "pending",
+  "contacted",
+  "closed",
+] as const;
+
+export type AppointmentRequestStatus =
+  (typeof appointmentRequestStatuses)[number];
+
 export type SafeClinicFetchResult = {
   clinics: ClinicListItem[];
   source: "places" | "mock";
@@ -281,6 +290,32 @@ export async function getAppointmentRequests() {
     .from(appointmentRequests)
     .innerJoin(clinics, eq(appointmentRequests.clinicId, clinics.id))
     .orderBy(desc(appointmentRequests.createdAt));
+}
+
+export async function updateAppointmentRequestStatus(
+  requestId: number,
+  status: AppointmentRequestStatus,
+) {
+  if (!appointmentRequestStatuses.includes(status)) {
+    throw new Error("Invalid appointment request status.");
+  }
+
+  const { appointmentRequests } = await import("./schema");
+  const db = getDb();
+  const [updatedRequest] = await db
+    .update(appointmentRequests)
+    .set({ status })
+    .where(eq(appointmentRequests.id, requestId))
+    .returning({
+      id: appointmentRequests.id,
+      status: appointmentRequests.status,
+    });
+
+  if (!updatedRequest) {
+    throw new Error("Appointment request not found.");
+  }
+
+  return updatedRequest;
 }
 
 export async function getTopClinics(limit = 8): Promise<ClinicListItem[]> {

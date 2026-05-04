@@ -17,15 +17,13 @@ type CreateAppointmentRequestResult =
   | { ok: true }
   | { ok: false; error: string };
 
-const notificationEmail = "m.a.yourdesigner@gmail.com";
-
 export async function submitAppointmentRequest(
   input: CreateAppointmentRequestInput,
 ): Promise<CreateAppointmentRequestResult> {
   try {
     const appointmentRequest = await createAppointmentRequest(input);
 
-    void sendAppointmentRequestNotification({
+    await sendAppointmentRequestNotification({
       clinicId: appointmentRequest.clinicId,
       slotDate: appointmentRequest.slotDate,
       startTime: appointmentRequest.startTime,
@@ -57,17 +55,32 @@ async function sendAppointmentRequestNotification(input: {
   note: string | null;
 }) {
   const apiKey = process.env.RESEND_API_KEY?.trim();
+  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim();
+  const notificationEmail =
+    process.env.APPOINTMENT_REQUEST_NOTIFICATION_EMAIL?.trim();
 
   if (!apiKey) {
     console.error("RESEND_API_KEY is missing. Skipping appointment request email.");
     return;
   }
 
+  if (!fromEmail) {
+    console.error("RESEND_FROM_EMAIL is missing. Skipping appointment request email.");
+    return;
+  }
+
+  if (!notificationEmail) {
+    console.error(
+      "APPOINTMENT_REQUEST_NOTIFICATION_EMAIL is missing. Skipping appointment request email.",
+    );
+    return;
+  }
+
   try {
     const resend = new Resend(apiKey);
 
-    await resend.emails.send({
-      from: "onboarding@resend.dev",
+    const { error } = await resend.emails.send({
+      from: fromEmail,
       to: notificationEmail,
       subject: "New appointment request",
       text: [
@@ -80,6 +93,10 @@ async function sendAppointmentRequestNotification(input: {
         `Note: ${input.note ?? ""}`,
       ].join("\n"),
     });
+
+    if (error) {
+      console.error("Failed to send appointment request email.", error);
+    }
   } catch (error) {
     console.error("Failed to send appointment request email.", error);
   }

@@ -1,3 +1,4 @@
+import { AdminRequestStatusSelect } from "@/components/admin-request-status-select";
 import { getAppointmentRequests } from "@/db";
 
 export const dynamic = "force-dynamic";
@@ -41,17 +42,34 @@ export default async function AdminRequestsPage() {
             ) : (
               requests.map((request) => (
                 <tr key={request.id} className="align-top">
-                  <td className="px-4 py-3 text-foreground">{request.clinicName}</td>
+                  <td className="px-4 py-3 text-foreground">
+                    <div className="min-w-[180px] font-medium">{request.clinicName}</div>
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{request.slotDate}</td>
                   <td className="px-4 py-3 text-muted-foreground">{request.startTime}</td>
                   <td className="px-4 py-3 text-foreground">{request.patientName}</td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {request.patientEmail || request.patientPhone || "—"}
+                    <div className="min-w-[220px] space-y-1">
+                      {request.patientEmail ? (
+                        <div className="break-all text-foreground">{request.patientEmail}</div>
+                      ) : null}
+                      {request.patientPhone ? <div>{request.patientPhone}</div> : null}
+                      {!request.patientEmail && !request.patientPhone ? (
+                        <span>&mdash;</span>
+                      ) : null}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {request.note || "—"}
+                    <div className="max-w-[260px] whitespace-pre-wrap break-words">
+                      {request.note || <span>&mdash;</span>}
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{request.status}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    <AdminRequestStatusSelect
+                      requestId={request.id}
+                      value={normalizeRequestStatus(request.status)}
+                    />
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {formatCreatedAt(request.createdAt)}
                   </td>
@@ -72,4 +90,12 @@ function formatCreatedAt(createdAt: Date | string) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
+}
+
+function normalizeRequestStatus(status: string) {
+  if (status === "contacted" || status === "closed") {
+    return status;
+  }
+
+  return "pending";
 }
