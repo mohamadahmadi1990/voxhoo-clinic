@@ -1,5 +1,5 @@
 import { neon } from "@neondatabase/serverless";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import type { ClinicCategorySlug } from "../lib/clinic-categories";
 import type { ClinicListItem } from "../lib/clinic-list-item";
@@ -21,6 +21,7 @@ import {
 } from "../lib/clinic-search";
 
 export type { ClinicListItem } from "../lib/clinic-list-item";
+export type { ClinicTimeSlotStatus } from "./schema";
 
 type CreateAppointmentRequestInput = {
   clinicId: number;
@@ -230,37 +231,64 @@ export async function createAppointmentRequest(
     throw new Error("Enter a valid email address.");
   }
 
-  const { appointmentRequests, clinicTimeSlots } = await import("./schema");
   const db = getDb();
-  const matchingSlot = await db
-    .select({ id: clinicTimeSlots.id })
-    .from(clinicTimeSlots)
-    .where(
-      and(
-        eq(clinicTimeSlots.clinicId, input.clinicId),
-        eq(clinicTimeSlots.slotDate, input.slotDate),
-        eq(clinicTimeSlots.startTime, normalizedStartTime),
-        eq(clinicTimeSlots.status, "available"),
-      ),
+  const result = await db.execute<{
+    id: number;
+    clinicId: number;
+    slotDate: string;
+    startTime: string;
+    patientName: string;
+    patientEmail: string | null;
+    patientPhone: string | null;
+    note: string | null;
+    status: string;
+    createdAt: Date;
+  }>(sql`
+    WITH updated_slot AS (
+      UPDATE clinic_time_slots
+      SET status = 'pending'
+      WHERE clinic_id = ${input.clinicId}
+        AND slot_date = ${input.slotDate}
+        AND start_time = ${normalizedStartTime}
+        AND status = 'available'
+      RETURNING id
     )
-    .limit(1);
+    INSERT INTO appointment_requests (
+      clinic_id,
+      slot_date,
+      start_time,
+      patient_name,
+      patient_email,
+      patient_phone,
+      note
+    )
+    SELECT
+      ${input.clinicId},
+      ${input.slotDate},
+      ${normalizedStartTime},
+      ${patientName},
+      ${patientEmail || null},
+      ${patientPhone || null},
+      ${note || null}
+    FROM updated_slot
+    RETURNING
+      id,
+      clinic_id AS "clinicId",
+      slot_date AS "slotDate",
+      start_time AS "startTime",
+      patient_name AS "patientName",
+      patient_email AS "patientEmail",
+      patient_phone AS "patientPhone",
+      note,
+      status,
+      created_at AS "createdAt"
+  `);
 
-  if (matchingSlot.length === 0) {
+  const appointmentRequest = result.rows[0];
+
+  if (!appointmentRequest) {
     throw new Error("This time is no longer available.");
   }
-
-  const [appointmentRequest] = await db
-    .insert(appointmentRequests)
-    .values({
-      clinicId: input.clinicId,
-      slotDate: input.slotDate,
-      startTime: normalizedStartTime,
-      patientName,
-      patientEmail: patientEmail || null,
-      patientPhone: patientPhone || null,
-      note: note || null,
-    })
-    .returning();
 
   return appointmentRequest;
 }

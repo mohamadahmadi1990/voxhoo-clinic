@@ -11,11 +11,17 @@ import {
 import { clinicCategorySlugs } from "../lib/clinic-categories";
 
 export const clinicCategoryEnum = pgEnum("clinic_category", clinicCategorySlugs);
-export const clinicTimeSlotStatusEnum = pgEnum("clinic_time_slot_status", [
+export const clinicTimeSlotStatuses = [
   "available",
+  "pending",
   "booked",
   "cancelled",
-]);
+] as const;
+export type ClinicTimeSlotStatus = (typeof clinicTimeSlotStatuses)[number];
+export const clinicTimeSlotStatusEnum = pgEnum(
+  "clinic_time_slot_status",
+  clinicTimeSlotStatuses,
+);
 
 export const clinics = pgTable("clinics", {
   id: serial("id").primaryKey(),

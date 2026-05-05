@@ -1,10 +1,11 @@
 import type { ClinicCategorySlug } from "./clinic-categories";
 import type { ClinicAreaLabel } from "./clinic-search";
+import type { ClinicTimeSlotStatus } from "../db/schema";
 
 export type ClinicTimeSlotListItem = {
   startTime: string;
   endTime: string;
-  status: "available" | "booked" | "cancelled";
+  status: ClinicTimeSlotStatus;
 };
 
 export type ClinicListItem = {

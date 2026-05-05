@@ -1,7 +1,7 @@
 'use server'
 
 import { createAppointmentRequest } from "@/db";
-import { Resend } from "resend";
+import { sendAppointmentRequestEmails } from "@/lib/appointment-request-email";
 
 type CreateAppointmentRequestInput = {
   clinicId: number;
@@ -33,8 +33,7 @@ export async function submitAppointmentRequest(
       note: appointmentRequest.note,
     };
 
-    await sendAppointmentRequestNotification(notificationInput);
-    await sendPatientConfirmationEmail(notificationInput);
+    await sendAppointmentRequestEmails(notificationInput);
 
     return { ok: true };
   } catch (error) {
@@ -45,128 +44,5 @@ export async function submitAppointmentRequest(
           ? error.message
           : "Unable to send request right now.",
     };
-  }
-}
-
-async function sendAppointmentRequestNotification(input: {
-  clinicId: number;
-  slotDate: string;
-  startTime: string;
-  patientName: string;
-  patientEmail: string | null;
-  patientPhone: string | null;
-  note: string | null;
-}) {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim();
-  const notificationEmail =
-    process.env.APPOINTMENT_REQUEST_NOTIFICATION_EMAIL?.trim();
-
-  if (!apiKey) {
-    console.error("RESEND_API_KEY is missing. Skipping appointment request email.");
-    return;
-  }
-
-  if (!fromEmail) {
-    console.error("RESEND_FROM_EMAIL is missing. Skipping appointment request email.");
-    return;
-  }
-
-  if (!notificationEmail) {
-    console.error(
-      "APPOINTMENT_REQUEST_NOTIFICATION_EMAIL is missing. Skipping appointment request email.",
-    );
-    return;
-  }
-
-  try {
-    const resend = new Resend(apiKey);
-
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
-      to: notificationEmail,
-      subject: "New appointment request",
-      text: [
-        `Clinic ID: ${input.clinicId}`,
-        `Date: ${input.slotDate}`,
-        `Time: ${input.startTime}`,
-        `Patient name: ${input.patientName}`,
-        `Email: ${input.patientEmail ?? ""}`,
-        `Phone: ${input.patientPhone ?? ""}`,
-        `Note: ${input.note ?? ""}`,
-      ].join("\n"),
-    });
-
-    if (error) {
-      console.error("Failed to send appointment request email.", error);
-      return;
-    }
-
-    console.info("Appointment request email sent.", {
-      emailId: data?.id ?? null,
-      to: notificationEmail,
-      clinicId: input.clinicId,
-    });
-  } catch (error) {
-    console.error("Failed to send appointment request email.", error);
-  }
-}
-
-async function sendPatientConfirmationEmail(input: {
-  clinicId: number;
-  slotDate: string;
-  startTime: string;
-  patientName: string;
-  patientEmail: string | null;
-  patientPhone: string | null;
-  note: string | null;
-}) {
-  if (!input.patientEmail) {
-    return;
-  }
-
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim();
-
-  if (!apiKey) {
-    console.error("RESEND_API_KEY is missing. Skipping patient confirmation email.");
-    return;
-  }
-
-  if (!fromEmail) {
-    console.error("RESEND_FROM_EMAIL is missing. Skipping patient confirmation email.");
-    return;
-  }
-
-  try {
-    const resend = new Resend(apiKey);
-
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
-      to: input.patientEmail,
-      subject: "We received your appointment request",
-      text: [
-        `Hi ${input.patientName},`,
-        "",
-        "We received your appointment request.",
-        `Requested date: ${input.slotDate}`,
-        `Requested time: ${input.startTime}`,
-        "",
-        "The clinic will contact you soon.",
-      ].join("\n"),
-    });
-
-    if (error) {
-      console.error("Failed to send patient confirmation email.", error);
-      return;
-    }
-
-    console.info("Patient confirmation email sent.", {
-      emailId: data?.id ?? null,
-      to: input.patientEmail,
-      clinicId: input.clinicId,
-    });
-  } catch (error) {
-    console.error("Failed to send patient confirmation email.", error);
   }
 }

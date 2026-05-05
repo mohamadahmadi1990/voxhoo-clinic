@@ -19,6 +19,7 @@ The app is built around a lightweight marketplace-style browsing flow:
 - Mobile map-first bottom-sheet browsing flow
 - Clinic detail drawer with availability and appointment request form
 - Simple admin request list at `/admin/requests`
+- Admin status updates for appointment requests
 
 Current stack:
 
@@ -64,7 +65,13 @@ npm run dev
 
 5. Optional: if you want database-backed availability and appointment requests locally, add `DATABASE_URL` to `.env.local`.
 
-6. Optional: if you want appointment request email notifications, also add `RESEND_API_KEY` to `.env.local`.
+6. Optional: if you want appointment request emails, also add the Resend values to `.env.local`:
+
+```env
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM_EMAIL=notifications@yourdomain.com
+APPOINTMENT_REQUEST_NOTIFICATION_EMAIL=you@example.com
+```
 
 7. Historical Drizzle utilities are still available:
 
@@ -82,14 +89,16 @@ The tracked example file is [`.env.example`](./.env.example).
 | `GOOGLE_PLACES_API_KEY` | Yes for live clinic search | Used by server-side Google Places Text Search requests |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Yes for live map pins | Loads the Google Maps JavaScript API in the browser |
 | `DATABASE_URL` | Optional for local data-backed flows | Used by Neon/Drizzle reads and writes, including appointment requests |
-| `RESEND_API_KEY` | Optional | Sends a notification email after an appointment request is created |
+| `RESEND_API_KEY` | Optional | Authenticates Resend email sending |
+| `RESEND_FROM_EMAIL` | Optional | Verified sender used for appointment request emails |
+| `APPOINTMENT_REQUEST_NOTIFICATION_EMAIL` | Optional | Admin inbox for new appointment request notifications |
 
 Notes:
 
 - If `GOOGLE_PLACES_API_KEY` is missing or the Places request fails, the app falls back to sample Toronto clinic data so the homepage and category pages keep working.
 - If `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is missing, the clinic list still works and the map area shows a friendly placeholder instead of crashing.
 - `DATABASE_URL` is not required for basic Google Places browsing, but it is required for local availability-backed results and appointment request storage.
-- `RESEND_API_KEY` is optional and email failures do not block appointment request success.
+- Resend email configuration is optional and email failures do not block appointment request success.
 - `.env.local` is intentionally ignored by git and should hold your real local secrets.
 
 ## Google Places Setup
@@ -171,6 +180,15 @@ If you change the schema later, generate a new migration with:
 npm run db:generate
 ```
 
+Important current manual SQL notes:
+
+- The `appointment_requests` table was intentionally created with a safe manual SQL migration instead of `db:push`.
+- The slot hold flow now also requires the slot status enum value:
+
+```sql
+ALTER TYPE clinic_time_slot_status ADD VALUE IF NOT EXISTS 'pending';
+```
+
 ## Seed Command
 
 To load the sample Toronto clinic dataset:
@@ -194,7 +212,8 @@ What it does:
 5. User clicks a clinic card or map pin to focus a clinic
 6. User opens the clinic detail drawer to review availability
 7. User can submit an appointment request for an available slot
-8. Admin can review requests at `/admin/requests`
+8. The selected slot is moved to `pending`
+9. Admin can review and update requests at `/admin/requests`
 
 Current routes:
 
@@ -209,8 +228,10 @@ Current routes:
 - Google Places results are enriched with app-layer area and mock availability metadata so the current UI stays intact.
 - The UI safely falls back to sample Toronto clinic data for demos or temporary API outages.
 - Appointment requests validate required contact info and verify the requested slot is still available before insert.
-- Appointment requests do not book or lock a slot yet; this is request capture only.
+- Appointment requests now place the selected slot into a temporary `pending` hold so other users do not see it as available.
+- Appointment requests can trigger both an admin notification email and a patient confirmation email.
 - Admin request listing is forced dynamic so fresh request data appears on Vercel.
+- Admin can update request status inline with `pending`, `contacted`, and `closed`.
 - Mobile results now use a full-screen map with a bottom sheet drawer for clinic browsing.
 
 ## Appointment Requests
@@ -224,17 +245,37 @@ Current appointment request behavior:
   - basic email format if email is provided
   - slot must exist and still be `available`
 - Normalizes `HH:mm` start times to `HH:mm:ss` before DB lookup/insert
-- Inserts a request only
-- Does not change `clinic_time_slots`
-- Does not create booking logic
-- Optionally sends a Resend email notification after insert
+- Atomically changes the matching slot from `available` to `pending`
+- Inserts the request only if the slot hold succeeds
+- Does not create final booking logic yet
+- Optionally sends a Resend admin notification and patient confirmation email after insert
+
+Current admin request behavior:
+
+- `/admin/requests` joins requests with clinic names
+- newest requests appear first
+- request status can be updated inline
+- status options are:
+  - `pending`
+  - `contacted`
+  - `closed`
+
+Current slot lifecycle:
+
+- `available`: visible and requestable
+- `pending`: temporarily held after request submit
+- `booked`: reserved/finalized in a later flow
+- `cancelled`: unavailable
 
 Current related files:
 
 - `src/db/schema.ts`
 - `src/db/index.ts`
 - `src/app/actions/create-appointment-request.ts`
+- `src/lib/appointment-request-email.ts`
 - `src/components/clinic-detail-drawer.tsx`
+- `src/app/admin/requests/page.tsx`
+- `src/components/admin-request-status-select.tsx`
 
 ## What Is Intentionally Not Built Yet
 

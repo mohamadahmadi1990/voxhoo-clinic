@@ -1,7 +1,7 @@
 # Project Phase Report Index
 
-Last updated: 2026-04-29
-Current branch: `codex/phase-19-kickoff`
+Last updated: 2026-05-05
+Current branch: `main`
 
 This index links to a separate dated report file for each completed phase of the clinic discovery MVP.
 
@@ -30,6 +30,11 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - [Phase 19: Google Places Live Clinic Search](./phases/2026-04-29-phase-19-google-places-live-clinic-search.md)
 - [Phase 20: Google Places Neon Import Script](./phases/2026-04-30-phase-20-google-places-neon-import-script.md)
 
+## Developer Handoff Reports
+
+- [Developer Status: 2026-05-02](./developer-status-2026-05-02.md)
+- [Developer Status: 2026-05-05](./developer-status-2026-05-05.md)
+
 ## Current Status
 
 - Category-based clinic discovery is working.
@@ -55,11 +60,15 @@ Dates below reflect the recorded delivery or review date captured in the repo hi
 - A new public GitHub home now exists at `mohamadahmadi1990/voxhoo-clinic`.
 - The workspace `origin` remote now points to `mohamadahmadi1990/voxhoo-clinic`.
 - The previous repository is now a historical reference only.
+- Appointment requests now create temporary `pending` slot holds.
+- Appointment request emails now support both admin notification and patient confirmation.
+- `/admin/requests` now supports inline request status updates.
 
 ## MVP Scope Still Intentionally Excluded
 
 - Authentication
 - Booking
+- Temporary slot release / checkout completion
 - Payments
 - Dashboards
 - Clinic management

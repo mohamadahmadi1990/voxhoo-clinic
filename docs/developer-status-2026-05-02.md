@@ -43,7 +43,7 @@ The main shipped pieces are:
   - phone
   - note
 - App validates and inserts into `appointment_requests`
-- Request does not book or lock the slot
+- App atomically changes the matching `clinic_time_slots.status` from `available` to `pending`
 
 ### 5. Admin Review
 - Admin visits `/admin/requests`
@@ -63,21 +63,28 @@ Current appointment request rules:
 - basic email validation when email exists
 - slot must exist and have `status = available`
 - `startTime` normalized from `HH:mm` to `HH:mm:ss`
-- insert only, no slot mutation
+- request insert and slot hold happen together in one atomic SQL statement
+
+Current slot lifecycle:
+- `available`: visible in the UI and requestable
+- `pending`: temporarily held after request submit
+- `booked`: reserved/final state for a later checkout flow
+- `cancelled`: unavailable
 
 ## Email Notification State
 
 Appointment request email notification is wired through Resend:
-- file: `src/app/actions/create-appointment-request.ts`
-- env var: `RESEND_API_KEY`
+- helper: `src/lib/appointment-request-email.ts`
+- action: `src/app/actions/create-appointment-request.ts`
+- env vars:
+  - `RESEND_API_KEY`
+  - `RESEND_FROM_EMAIL`
+  - `APPOINTMENT_REQUEST_NOTIFICATION_EMAIL`
 - current behavior:
   - DB insert happens first
+  - slot hold happens with the DB insert
   - email send is best-effort
   - email failures do not block success
-
-Important:
-- notification recipient is still a temporary hardcoded address in the action file
-- this should be replaced with a real destination or environment variable before production
 
 ## Mobile UI State
 
@@ -116,7 +123,7 @@ Known caveat:
 Still out of scope:
 - auth
 - payments
-- real booking / slot reservation
+- final booking / checkout completion
 - clinic-side dashboards
 - advanced filtering and search
 - notifications beyond the basic Resend email
@@ -124,14 +131,15 @@ Still out of scope:
 
 ## Recommended Next Steps
 
-1. Replace the temporary Resend recipient with a real config value
-2. Add explicit DB migrations for schema changes rather than relying on `db:push`
+1. Add explicit DB migrations for schema changes rather than relying on `db:push`
+2. Decide how `pending` slots return to `available` if checkout is abandoned
 3. Test mobile drawer behavior on physical devices
 4. Add lightweight tests for:
    - appointment request validation
+   - slot hold behavior
    - admin request rendering
    - mobile results interactions
-5. Decide whether appointment requests should later reserve slots or remain inquiry-only
+5. Define the final `pending -> booked` checkout transition
 
 ## Quick Commands
 
