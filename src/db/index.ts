@@ -328,7 +328,7 @@ export async function updateAppointmentRequestStatus(
     throw new Error("Invalid appointment request status.");
   }
 
-  const { appointmentRequests } = await import("./schema");
+  const { appointmentRequests, clinicTimeSlots } = await import("./schema");
   const db = getDb();
   const [updatedRequest] = await db
     .update(appointmentRequests)
@@ -337,10 +337,27 @@ export async function updateAppointmentRequestStatus(
     .returning({
       id: appointmentRequests.id,
       status: appointmentRequests.status,
+      clinicId: appointmentRequests.clinicId,
+      slotDate: appointmentRequests.slotDate,
+      startTime: appointmentRequests.startTime,
     });
 
   if (!updatedRequest) {
     throw new Error("Appointment request not found.");
+  }
+
+  if (status === "closed") {
+    await db
+      .update(clinicTimeSlots)
+      .set({ status: "available" })
+      .where(
+        and(
+          eq(clinicTimeSlots.clinicId, updatedRequest.clinicId),
+          eq(clinicTimeSlots.slotDate, updatedRequest.slotDate),
+          eq(clinicTimeSlots.startTime, updatedRequest.startTime),
+          eq(clinicTimeSlots.status, "pending"),
+        ),
+      );
   }
 
   return updatedRequest;
